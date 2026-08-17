@@ -2,6 +2,7 @@
 
 import { AppShell } from '@/components/app-shell';
 import { useAuthContext } from '@/context/authContext';
+import { BooksProvider } from '@/context/BookContext';
 import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
 
@@ -23,5 +24,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     return null;
   }
 
-  return <AppShell>{children}</AppShell>;
+  return (
+    <BooksProvider>
+      <AppShell>{children}</AppShell>
+    </BooksProvider>
+  );
 }

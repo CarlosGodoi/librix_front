@@ -1,0 +1,18 @@
+export const categories = [
+  'Romance',
+  'Fantasia',
+  'Ficção cientifíca',
+  'Ficção Distópica',
+  'Ficção',
+  'Suspense',
+  'Terror',
+  'Biografias',
+  'Autoajuda',
+  'Desenvolvimento Pessoal',
+  'Ciência',
+  'História',
+  'Infatil',
+  'Literatura Infantil',
+  'Poesia',
+  'Quadrinhos(HQs)',
+];

@@ -58,7 +58,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Library className="size-5" />
         </div>
         <div className="leading-tight">
-          <p className="text-sm font-semibold tracking-tight">Acervo</p>
+          <p className="text-sm font-semibold tracking-tight">LibriX</p>
           <p className="text-xs text-muted-foreground">Gestão de biblioteca</p>
         </div>
       </div>

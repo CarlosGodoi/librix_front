@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const response = await api.post('/token/refresh', { refreshToken });
+    const response = await api.post('/refresh', { refreshToken });
     const { accessToken } = response.data;
 
     const result = NextResponse.json({ ok: true }, { status: 200 });
