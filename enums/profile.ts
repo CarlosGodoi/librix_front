@@ -1,5 +1,5 @@
 export enum PROFILE {
-  ADMIN = 'Admin',
-  LIBRARIAN = 'Bibliotecário',
-  VISITOR = 'Visitante',
+  ADMIN = 'ADMIN',
+  LIBRARIAN = 'LIBRARIAN',
+  VISITOR = 'VISITOR',
 }
