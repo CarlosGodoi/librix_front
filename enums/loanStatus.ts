@@ -1,5 +1,5 @@
 export enum LoanStatus {
-  INPROGRESS = 'Em andamento',
-  RETURNED = 'Devolvido',
-  DELAYED = 'Atrasado',
+  INPROGRESS = 'INPROGRESS',
+  RETURNED = 'RETURNED',
+  DELAYED = 'DELAYED',
 }
