@@ -12,7 +12,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { useAuthContext } from '@/context/authContext';
 import { useBooksContext } from '@/context/BookContext';
+import { PROFILE } from '@/enums/profile';
 import { IBook } from '@/interfaces/books';
 import { cn } from '@/lib/utils';
 import { categories } from '@/utils/categories/categories';
@@ -26,7 +28,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useDeferredValue, useEffect, useMemo, useState } from 'react';
+import { useDeferredValue, useMemo, useState } from 'react';
 
 export default function BooksPage() {
   const [category, setCategory] = useState('todas');
@@ -34,6 +36,7 @@ export default function BooksPage() {
   const [selected, setSelected] = useState<IBook | null>(null); // TODO será implementado para chamada do modal
   const [open, setOpen] = useState(false); // TODO será implementado para chamada do modal
   const { books } = useBooksContext();
+  const { user } = useAuthContext();
   const deferredQuery = useDeferredValue(query);
 
   const FALLBACK_COVER = '/images/book-placeholder.png';
@@ -90,7 +93,6 @@ export default function BooksPage() {
           Cadastrar livro
         </Link>
       </div>
-
       <div className="grid gap-4 sm:grid-cols-3">
         {stats.map((s) => {
           const Icon = s.icon;
@@ -110,7 +112,6 @@ export default function BooksPage() {
           );
         })}
       </div>
-
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -138,7 +139,6 @@ export default function BooksPage() {
           </SelectContent>
         </Select>
       </div>
-
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-border py-16 text-center">
           <BookOpen className="size-8 text-muted-foreground" />
@@ -190,10 +190,9 @@ export default function BooksPage() {
           ))}
         </div>
       )}
-
       <BookDetailModal book={selected} open={open} onOpenChange={setOpen} />
 
-      {/* <BookRecommenderChat /> */}
+      {user?.profile === PROFILE.VISITOR && <BookRecommenderChat />}
     </div>
   );
 }
