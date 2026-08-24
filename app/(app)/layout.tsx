@@ -3,6 +3,8 @@
 import { AppShell } from '@/components/app-shell';
 import { useAuthContext } from '@/context/authContext';
 import { BooksProvider } from '@/context/BookContext';
+
+import { LoansProvider } from '@/context/loanContext';
 import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
 
@@ -26,7 +28,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <BooksProvider>
-      <AppShell>{children}</AppShell>
+      <LoansProvider>
+        <AppShell>{children}</AppShell>
+      </LoansProvider>
     </BooksProvider>
   );
 }

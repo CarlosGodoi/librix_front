@@ -25,9 +25,12 @@ export function BookDetailModal({ book, open, onOpenChange }: Props) {
 
   if (!book) return null;
 
+  const dateString = String(book?.year);
+  const parseDate = new Date(dateString).getUTCFullYear();
+
   const meta = [
     { icon: Hash, label: 'ISBN', value: book.isbn },
-    { icon: Calendar, label: 'Ano', value: String(book.year) },
+    { icon: Calendar, label: 'Ano', value: parseDate },
     { icon: Building2, label: 'Editora', value: book.publisher },
     {
       icon: Layers,
