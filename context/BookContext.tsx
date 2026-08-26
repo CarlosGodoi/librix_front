@@ -1,6 +1,11 @@
 'use client';
-import { IBooks } from '@/interfaces/books';
+
+import { BookFormOutput } from '@/app/(app)/livros/novo/schema/bookFormSchema';
+import { IBook, IUpdateBookPayload } from '@/interfaces/books';
 import { getAllBooks } from '@/services/livros/getAll';
+import { getBook } from '@/services/livros/getBookById';
+import { registerBook } from '@/services/livros/registerBook';
+import { updateBook } from '@/services/livros/updateBook';
 import {
   createContext,
   ReactNode,
@@ -18,12 +23,16 @@ interface BookFilter {
 }
 
 interface IBooksContext {
-  books: IBooks[];
+  books: IBook[];
   filter: BookFilter;
   isLoading: boolean;
   error: string | null;
+  selectedBook: IBook | undefined;
   setFilter: React.Dispatch<React.SetStateAction<BookFilter>>;
   refreshBooks: () => Promise<void>;
+  createBook: (data: BookFormOutput) => Promise<IBook>;
+  editBook: (id: string, data: IUpdateBookPayload) => Promise<IBook>;
+  getBookById: (id: string) => Promise<IBook>;
 }
 
 export const IBooksContext = createContext<IBooksContext>({} as IBooksContext);
@@ -33,7 +42,8 @@ interface IProps {
 }
 
 export const BooksProvider: React.FC<IProps> = ({ children }) => {
-  const [books, setBooks] = useState<IBooks[]>([]);
+  const [books, setBooks] = useState<IBook[]>([]);
+  const [selectedBook, setSelectedBook] = useState<IBook>();
   const [filter, setFilter] = useState<BookFilter>({
     title: '',
     author: '',
@@ -47,7 +57,7 @@ export const BooksProvider: React.FC<IProps> = ({ children }) => {
     setError(null);
 
     try {
-      const res = await getAllBooks({ take: 10, skip: 0 });
+      const res = await getAllBooks({ take: 12, skip: 0 });
 
       setBooks(res.books);
     } catch (error) {
@@ -56,6 +66,29 @@ export const BooksProvider: React.FC<IProps> = ({ children }) => {
       setIsLoading(false);
     }
   }, []);
+
+  async function createBook(data: BookFormOutput) {
+    const created = await registerBook(data);
+    setBooks((prev) => [...prev, created]);
+    return created;
+  }
+
+  async function editBook(id: string, data: IUpdateBookPayload) {
+    const updated = await updateBook(id, data);
+    setBooks((prev) => prev.map((book) => (book.id === id ? updated : book)));
+    return updated;
+  }
+
+  async function getBookById(id: string) {
+    const cached = books.find((b) => b.id === id);
+    if (cached) {
+      setSelectedBook(cached);
+      return cached;
+    }
+    const book = await getBook(id);
+    setSelectedBook(book);
+    return book;
+  }
 
   useEffect(() => {
     void refreshBooks();
@@ -91,6 +124,10 @@ export const BooksProvider: React.FC<IProps> = ({ children }) => {
         error,
         setFilter,
         refreshBooks,
+        createBook,
+        editBook,
+        getBookById,
+        selectedBook,
       }}
     >
       {children}

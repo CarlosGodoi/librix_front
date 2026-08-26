@@ -1,38 +1,33 @@
-interface IImage {
+export interface IImage {
   id: string;
   path: string;
 }
 
-interface IBooks {
+export interface IBook {
   id: string;
   title: string;
   author: string;
   isbn: string;
   publisher: string;
   category: string;
-  year: Date;
+  year: number;
   copies: number;
   synopsis: string;
-  coverUrl: IImage;
-  embedding?: JSON;
+  coverUrl?: IImage;
+  embedding?: number[];
   embeddingUpdateAt?: Date;
 }
-
-export type { IBooks };
-
-interface IBook {
-  id: string;
+export interface IRegisterBookPayload {
   title: string;
   author: string;
   isbn: string;
   publisher: string;
   category: string;
-  year: Date;
+  year: number;
   copies: number;
   synopsis: string;
-  coverUrl: IImage;
-  embedding?: JSON;
-  embeddingUpdateAt?: Date;
 }
-
-export type { IBook };
+export interface IUpdateBookPayload {
+  copies: number;
+  synopsis: string;
+}

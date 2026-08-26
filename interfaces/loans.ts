@@ -2,7 +2,7 @@ import { LoanStatus } from '@/enums/loanStatus';
 import { IBook } from './books';
 import { IUser } from './users';
 
-export interface ILoan {
+export interface ICreateLoanPayload {
   bookId: string;
   userId: string;
   dueDate: string;

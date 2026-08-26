@@ -13,6 +13,8 @@ import Image from 'next/image';
 import { Badge } from './ui/badge';
 import { AvailabilityBadge } from './availability-badge';
 import { Button } from './ui/button';
+import { useLoansContext } from '@/context/loanContext';
+import { LoanStatus } from '@/enums/loanStatus';
 
 type Props = {
   book: IBook | null;
@@ -22,7 +24,7 @@ type Props = {
 
 export function BookDetailModal({ book, open, onOpenChange }: Props) {
   const router = useRouter();
-
+  const { loans } = useLoansContext();
   if (!book) return null;
 
   const dateString = String(book?.year);
@@ -35,9 +37,11 @@ export function BookDetailModal({ book, open, onOpenChange }: Props) {
     {
       icon: Layers,
       label: 'Exemplares',
-      value: `4 de ${book.copies} disponíveis`, //TODO implementar a logica quando Loan estiver pronto
+      value: book.copies,
     },
   ];
+
+  console.log('ID_book=>', book.id);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -48,7 +52,7 @@ export function BookDetailModal({ book, open, onOpenChange }: Props) {
               src={
                 typeof book.coverUrl === 'string' && book.coverUrl
                   ? book.coverUrl
-                  : '/images/book-placeholder.png'
+                  : '/covers/placeholder.png'
               }
               alt={`Capa de ${book.title}`}
               fill

@@ -190,7 +190,7 @@ export default function TableLoans() {
                                 typeof book.coverUrl === 'string' &&
                                 book.coverUrl
                                   ? book.coverUrl
-                                  : '/images/book-placeholder.png'
+                                  : '/covers/placeholder.png'
                               }
                               alt={loan.book.title}
                               fill

@@ -14,10 +14,13 @@ import {
 } from '@/components/ui/select';
 import { useAuthContext } from '@/context/authContext';
 import { useBooksContext } from '@/context/BookContext';
+import { useLoansContext } from '@/context/loanContext';
+import { LoanStatus } from '@/enums/loanStatus';
 import { PROFILE } from '@/enums/profile';
 import { IBook } from '@/interfaces/books';
 import { cn } from '@/lib/utils';
 import { categories } from '@/utils/categories/categories';
+import { count } from 'console';
 import {
   ArrowLeftRight,
   BookOpen,
@@ -33,13 +36,14 @@ import { useDeferredValue, useMemo, useState } from 'react';
 export default function BooksPage() {
   const [category, setCategory] = useState('todas');
   const [query, setQuery] = useState('');
-  const [selected, setSelected] = useState<IBook | null>(null); // TODO será implementado para chamada do modal
-  const [open, setOpen] = useState(false); // TODO será implementado para chamada do modal
+  const [selected, setSelected] = useState<IBook | null>(null);
+  const [open, setOpen] = useState(false);
   const { books } = useBooksContext();
+  const { loans } = useLoansContext();
   const { user } = useAuthContext();
   const deferredQuery = useDeferredValue(query);
 
-  const FALLBACK_COVER = '/images/book-placeholder.png';
+  const FALLBACK_COVER = '/covers/placeholder.png';
 
   const stats = [
     { label: 'Livros no acervo', value: books.length, icon: Library },
@@ -49,9 +53,12 @@ export default function BooksPage() {
       icon: BookOpen,
     },
     {
-      // TODO: Vem da API rota de emprestimos ainda falta implementar
       label: 'Empréstimos ativos',
-      value: 12,
+      value: loans.reduce(
+        (count, loan) =>
+          count + (loan.status === LoanStatus.INPROGRESS ? 1 : 0),
+        0,
+      ),
       icon: ArrowLeftRight,
     },
   ];

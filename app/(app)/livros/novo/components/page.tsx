@@ -3,8 +3,12 @@ import { Button } from '@/components/ui/button';
 import { IBook } from '@/interfaces/books';
 import { ArrowLeft, BookPlus, Save, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { bookFormSchema, BookFormSchema } from '../schema/bookFormSchema';
+import { Controller, useForm } from 'react-hook-form';
+import {
+  BookFormInput,
+  BookFormOutput,
+  bookFormSchema,
+} from '../schema/bookFormSchema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import Image from 'next/image';
 import { Field, FieldLabel } from '@/components/ui/field';
@@ -18,33 +22,88 @@ import {
 } from '@/components/ui/select';
 import { categories } from '@/utils/categories/categories';
 import { Textarea } from '@/components/ui/textarea';
+import { formatISBN } from '@/utils/formatISBN';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
+import { useBooksContext } from '@/context/BookContext';
 
 type BookProps = { book?: IBook };
 
-export default function AddBookForm({ book }: BookProps) {
+export default function BookForm({ book }: BookProps) {
+  const [loading, setLoading] = useState(false);
+  const { editBook, createBook } = useBooksContext();
   const router = useRouter();
   const isEdit = Boolean(book);
 
-  const form = useForm<BookFormSchema>({
+  const form = useForm<BookFormInput, any, BookFormOutput>({
     resolver: zodResolver(bookFormSchema),
     defaultValues: {
-      title: '',
-      author: '',
-      isbn: '',
-      category: '',
-      year: new Date(),
-      copies: 0,
-      publisher: '',
-      synopsis: '',
-      coverUrl: '',
+      title: book?.title ?? '',
+      author: book?.author ?? '',
+      isbn: book?.isbn ?? '',
+      category: book?.category ?? '',
+      year: book?.year ?? 0,
+      copies: book?.copies ?? 0,
+      publisher: book?.publisher ?? '',
+      synopsis: book?.synopsis ?? '',
+      coverUrl:
+        typeof book?.coverUrl === 'string'
+          ? book.coverUrl
+          : (book?.coverUrl?.path ?? '/covers/placeholder.png'),
     },
   });
 
   const {
     register,
+    setValue,
     handleSubmit,
     formState: { errors },
   } = form;
+
+  useEffect(() => {
+    if (book) {
+      form.reset({
+        title: book?.title,
+        author: book?.author,
+        isbn: book?.isbn,
+        category: book?.category,
+        year: book?.year,
+        copies: book?.copies,
+        publisher: book?.publisher,
+        synopsis: book?.synopsis,
+        coverUrl:
+          typeof book?.coverUrl === 'string'
+            ? book.coverUrl
+            : (book?.coverUrl?.path ?? '/covers/placeholder.png'),
+      });
+    }
+  }, [book]);
+
+  console.log('BookForm renderizou com book=>', book);
+
+  async function onSubmitForm(data: BookFormOutput) {
+    try {
+      setLoading(true);
+      const result = isEdit
+        ? await editBook(book?.id ?? '', data)
+        : await createBook(data);
+
+      if (result) {
+        toast.success(
+          isEdit
+            ? 'Livro atualizado com sucesso.'
+            : 'Livro cadastrado com sucesso.',
+        );
+        router.push('/livros');
+      } else {
+        toast.error('Não foi possível efetuar o cadastro.');
+      }
+    } catch (error) {
+      toast.error('Ocorreu um erro inesperado. Tente novamente.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <div className="mx-auto max-w-3xl  space-y-6">
@@ -71,7 +130,7 @@ export default function AddBookForm({ book }: BookProps) {
       </div>
 
       <form
-        onSubmit={() => {}}
+        onSubmit={handleSubmit(onSubmitForm)}
         className="space-y-6 rounded-xl border border-border bg-card p-6"
       >
         <div className="flex flex-col gap-6 sm:flex-row">
@@ -113,7 +172,18 @@ export default function AddBookForm({ book }: BookProps) {
         <div className="grid gap-4 sm:grid-cols-2">
           <Field className="space-y-2">
             <FieldLabel htmlFor="isbn">ISBN</FieldLabel>
-            <Input id="isbn" {...register('isbn')} placeholder="978-..." />
+            <Input
+              id="isbn"
+              placeholder="123-45-67890-12-3"
+              {...register('isbn')}
+              onChange={(e) => {
+                const formatted = formatISBN(e.target.value);
+
+                e.target.value = formatted;
+
+                setValue('isbn', formatted);
+              }}
+            />
           </Field>
           <Field className="space-y-2">
             <FieldLabel htmlFor="publisher">Editora</FieldLabel>
@@ -125,23 +195,29 @@ export default function AddBookForm({ book }: BookProps) {
           </Field>
           <Field className="space-y-2">
             <FieldLabel htmlFor="category">Categoria</FieldLabel>
-            <Select value={form.watch('category')} {...register('category')}>
-              <SelectTrigger id="category">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Controller
+              name="category"
+              control={form.control}
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger id="category">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map((c) => (
+                      <SelectItem key={c} value={c}>
+                        {c}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </Field>
           <div className="grid grid-cols-2 gap-4">
             <Field className="space-y-2">
               <FieldLabel htmlFor="year">Ano</FieldLabel>
-              <Input id="year" type="date" {...register('year')} />
+              <Input id="year" type="number" min={1} {...register('year')} />
             </Field>
             <Field className="space-y-2">
               <FieldLabel htmlFor="copies">Exemplares</FieldLabel>
@@ -187,16 +263,16 @@ export default function AddBookForm({ book }: BookProps) {
             >
               Cancelar
             </Button>
-            <Button type="submit">
+            <Button type="submit" disabled={loading}>
               {isEdit ? (
                 <>
                   <Save className="size-4" />
-                  Salvar alterações
+                  {loading ? 'Salvando...' : 'Salvar alterações'}
                 </>
               ) : (
                 <>
                   <BookPlus className="size-4" />
-                  Cadastrar livro
+                  {loading ? 'Cadastrando...' : 'Cadastrar livro'}
                 </>
               )}
             </Button>

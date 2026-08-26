@@ -1,4 +1,4 @@
-import { ILoan, Loan } from '@/interfaces/loans';
+import { ICreateLoanPayload, Loan } from '@/interfaces/loans';
 import { apiFront } from '../api';
 
 export const registerLoan = async ({
@@ -6,7 +6,7 @@ export const registerLoan = async ({
   userId,
   dueDate,
   loanDate,
-}: ILoan): Promise<Loan> => {
+}: ICreateLoanPayload): Promise<Loan> => {
   const response = await apiFront.post('/api/emprestimos/novo', {
     bookId,
     userId,
