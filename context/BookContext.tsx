@@ -6,6 +6,8 @@ import { getAllBooks } from '@/services/livros/getAll';
 import { getBook } from '@/services/livros/getBookById';
 import { registerBook } from '@/services/livros/registerBook';
 import { updateBook } from '@/services/livros/updateBook';
+import { uploadImageBook } from '@/services/livros/uploadImage';
+
 import {
   createContext,
   ReactNode,
@@ -32,6 +34,7 @@ interface IBooksContext {
   refreshBooks: () => Promise<void>;
   createBook: (data: BookFormOutput) => Promise<IBook>;
   editBook: (id: string, data: IUpdateBookPayload) => Promise<IBook>;
+  uploadImage: (bookId: string, image: File) => Promise<IBook>;
   getBookById: (id: string) => Promise<IBook>;
 }
 
@@ -68,15 +71,57 @@ export const BooksProvider: React.FC<IProps> = ({ children }) => {
   }, []);
 
   async function createBook(data: BookFormOutput) {
-    const created = await registerBook(data);
-    setBooks((prev) => [...prev, created]);
-    return created;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const created = await registerBook(data);
+      setBooks((prev) => [...prev, created]);
+      return created;
+    } catch (error) {
+      setError('Erro ao cadastrar livro.');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   async function editBook(id: string, data: IUpdateBookPayload) {
-    const updated = await updateBook(id, data);
-    setBooks((prev) => prev.map((book) => (book.id === id ? updated : book)));
-    return updated;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const updated = await updateBook(id, data);
+      setBooks((prev) => prev.map((book) => (book.id === id ? updated : book)));
+      return updated;
+    } catch (error) {
+      setError('Erro ao editar livro.');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function uploadImage(bookId: string, image: File) {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await uploadImageBook(bookId, image); // ignora o retorno
+      const refreshed = await getBook(bookId); // busca o livro atualizado
+
+      setBooks((prev) =>
+        prev.map((book) => (book.id === bookId ? refreshed : book)),
+      );
+
+      if (selectedBook?.id === bookId) {
+        setSelectedBook(refreshed);
+      }
+
+      return refreshed;
+    } catch (error) {
+      setError('Erro ao enviar imagem');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   async function getBookById(id: string) {
@@ -126,6 +171,7 @@ export const BooksProvider: React.FC<IProps> = ({ children }) => {
         refreshBooks,
         createBook,
         editBook,
+        uploadImage,
         getBookById,
         selectedBook,
       }}

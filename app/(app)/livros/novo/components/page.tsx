@@ -1,7 +1,7 @@
 'use client';
 import { Button } from '@/components/ui/button';
 import { IBook } from '@/interfaces/books';
-import { ArrowLeft, BookPlus, Save, Trash2 } from 'lucide-react';
+import { ArrowLeft, BookPlus, Loader2, Save, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Controller, useForm } from 'react-hook-form';
 import {
@@ -23,7 +23,7 @@ import {
 import { categories } from '@/utils/categories/categories';
 import { Textarea } from '@/components/ui/textarea';
 import { formatISBN } from '@/utils/formatISBN';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useBooksContext } from '@/context/BookContext';
 
@@ -31,9 +31,11 @@ type BookProps = { book?: IBook };
 
 export default function BookForm({ book }: BookProps) {
   const [loading, setLoading] = useState(false);
-  const { editBook, createBook } = useBooksContext();
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const { editBook, createBook, uploadImage } = useBooksContext();
   const router = useRouter();
   const isEdit = Boolean(book);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<BookFormInput, any, BookFormOutput>({
     resolver: zodResolver(bookFormSchema),
@@ -79,7 +81,45 @@ export default function BookForm({ book }: BookProps) {
     }
   }, [book]);
 
-  console.log('BookForm renderizou com book=>', book);
+  function handleCoverClick() {
+    if (isEdit && !uploadingImage) {
+      fileInputRef.current?.click();
+    }
+  }
+
+  async function handleCoverChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const image = e.target.files?.[0];
+    e.target.value = '';
+
+    if (!image || !book) return;
+
+    const previewUrl = URL.createObjectURL(image);
+    setValue('coverUrl', previewUrl);
+
+    try {
+      setUploadingImage(true);
+      const updated = await uploadImage(book.id, image);
+
+      const newCoverUrl =
+        typeof updated.coverUrl === 'string'
+          ? updated.coverUrl
+          : (updated.coverUrl?.path ?? previewUrl);
+
+      setValue('coverUrl', newCoverUrl);
+      toast.success('Capa atualizada com sucesso.');
+    } catch (error) {
+      toast.error('Erro ao envia a nova capa.');
+      setValue(
+        'coverUrl',
+        typeof book.coverUrl === 'string'
+          ? book.coverUrl
+          : (book.coverUrl?.path ?? '/covers/placeholder.png'),
+      );
+    } finally {
+      setUploadingImage(false);
+      URL.revokeObjectURL(previewUrl);
+    }
+  }
 
   async function onSubmitForm(data: BookFormOutput) {
     try {
@@ -135,7 +175,14 @@ export default function BookForm({ book }: BookProps) {
       >
         <div className="flex flex-col gap-6 sm:flex-row">
           <div className="flex flex-col items-center gap-2">
-            <div className="relative aspect-3/4 w-32 overflow-hidden rounded-lg border border-border bg-muted">
+            <div
+              className={`relative aspect-3/4 w-32 overflow-hidden rounded-lg border border-border bg-muted ${
+                isEdit ? 'cursor-pointer' : ''
+              }`}
+              onClick={handleCoverClick}
+              role={isEdit ? 'button' : undefined}
+              aria-label={isEdit ? 'Alterar capa do livro' : undefined}
+            >
               <Image
                 src={form.watch('coverUrl') || '/covers/placeholder.png'}
                 alt="Pré-visualização da capa"
@@ -143,10 +190,24 @@ export default function BookForm({ book }: BookProps) {
                 className="object-cover"
                 sizes="128px"
               />
+              {isEdit && uploadingImage && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                  <Loader2 className="size-6 animate-spin text-white" />
+                </div>
+              )}
             </div>
             <p className="text-center text-xs text-muted-foreground">
-              Pré-visualização
+              {isEdit ? 'Clique para alterar a capa' : 'Pré-visualização'}
             </p>
+            {isEdit && (
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleCoverChange}
+              />
+            )}
           </div>
 
           <div className="flex-1 space-y-4">
@@ -156,6 +217,7 @@ export default function BookForm({ book }: BookProps) {
                 id="title"
                 {...register('title')}
                 placeholder="Ex.: Dom Casmurro"
+                disabled={isEdit}
               />
             </Field>
             <Field className="space-y-2">
@@ -164,6 +226,7 @@ export default function BookForm({ book }: BookProps) {
                 id="author"
                 {...register('author')}
                 placeholder="Ex.: Machado de Assis"
+                disabled={isEdit}
               />
             </Field>
           </div>
@@ -183,6 +246,7 @@ export default function BookForm({ book }: BookProps) {
 
                 setValue('isbn', formatted);
               }}
+              disabled={isEdit}
             />
           </Field>
           <Field className="space-y-2">
@@ -191,6 +255,7 @@ export default function BookForm({ book }: BookProps) {
               id="publisher"
               {...register('publisher')}
               placeholder="Ex.: Companhia das Letras"
+              disabled={isEdit}
             />
           </Field>
           <Field className="space-y-2">
@@ -212,12 +277,19 @@ export default function BookForm({ book }: BookProps) {
                   </SelectContent>
                 </Select>
               )}
+              disabled={isEdit}
             />
           </Field>
           <div className="grid grid-cols-2 gap-4">
             <Field className="space-y-2">
               <FieldLabel htmlFor="year">Ano</FieldLabel>
-              <Input id="year" type="number" min={1} {...register('year')} />
+              <Input
+                id="year"
+                type="number"
+                min={1}
+                {...register('year')}
+                disabled={isEdit}
+              />
             </Field>
             <Field className="space-y-2">
               <FieldLabel htmlFor="copies">Exemplares</FieldLabel>

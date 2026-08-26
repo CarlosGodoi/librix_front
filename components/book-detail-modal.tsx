@@ -14,7 +14,6 @@ import { Badge } from './ui/badge';
 import { AvailabilityBadge } from './availability-badge';
 import { Button } from './ui/button';
 import { useLoansContext } from '@/context/loanContext';
-import { LoanStatus } from '@/enums/loanStatus';
 
 type Props = {
   book: IBook | null;
