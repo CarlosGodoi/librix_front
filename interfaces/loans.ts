@@ -25,8 +25,12 @@ export interface ILoans {
   bookId: string;
   loanDate: Date;
   dueDate: Date;
-  returnDate: null;
+  returnDate: Date | null;
   status: LoanStatus;
   book: IBook;
   user: IUser;
+}
+
+export interface ReturnedLoanOutput {
+  message: string;
 }

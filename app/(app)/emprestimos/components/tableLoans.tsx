@@ -65,7 +65,9 @@ const parseDate = (value: string | Date) => {
     : new Date(value);
 };
 
-function effectiveStatus(loan: Loan): Loan['status'] {
+function effectiveStatus(
+  loan: Pick<Loan, 'status' | 'dueDate'>,
+): Loan['status'] {
   if (loan.status === LoanStatus.RETURNED) {
     return LoanStatus.RETURNED;
   }
@@ -96,7 +98,7 @@ function StatusBadge({ status }: { status: LoanStatus }) {
 }
 
 export default function TableLoans() {
-  const { loans } = useLoansContext();
+  const { loans, returnedLoan } = useLoansContext();
   const safeLoans = loans ?? [];
   const [tab, setTab] = useState<
     'todos' | 'ativos' | 'atrasados' | 'devolvidos'
@@ -131,10 +133,10 @@ export default function TableLoans() {
     return l.computed === LoanStatus.RETURNED;
   });
 
-  // const handleReturn = (loanId: string) => {
-  //   returnLoan(loanId);
-  //   toast.success('Devolução registrada.');
-  // };
+  const handleReturn = (loanId: string) => {
+    returnedLoan(loanId);
+    toast.success('Devolução registrada.');
+  };
 
   return (
     <div className="space-y-8">
@@ -242,7 +244,11 @@ export default function TableLoans() {
                           Concluído
                         </span>
                       ) : (
-                        <Button variant="outline" size="sm" onClick={() => {}}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleReturn(loan.id)}
+                        >
                           <RotateCcw className="size-3.5" />
                           Devolver
                         </Button>
