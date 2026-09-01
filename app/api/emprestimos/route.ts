@@ -6,9 +6,6 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const accessToken = req.cookies.get('token')?.value;
 
-  console.log('cookies recebidos:', req.cookies.getAll()); // debug temporário
-  console.log('token encontrado:', accessToken);
-
   try {
     const response = await api.get('/loans', {
       headers: {
