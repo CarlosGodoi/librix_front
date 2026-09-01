@@ -6,9 +6,16 @@ export interface IUser {
   name: string;
   email: string;
   phone: string;
-  password: string;
   profile: PROFILE;
   situation: STATUS;
   createdAt: Date;
   updatedAt: Date | null;
 }
+
+// Payloads derivados, não duplicados:
+export type UserCreatePayload = Omit<
+  IUser,
+  'id' | 'createdAt' | 'updatedAt'
+> & { password: string };
+export type UserUpdatePayload = Omit<IUser, 'createdAt'>;
+export type UserUpdateFormPayload = Omit<UserUpdatePayload, 'id' | 'updatedAt'>;
