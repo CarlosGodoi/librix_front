@@ -1,3 +1,5 @@
+'use client';
+
 import { LoanStatus } from '@/enums/loanStatus';
 import { ILoans, ReturnedLoanOutput } from '@/interfaces/loans';
 import { getAllLoans } from '@/services/emprestimos/getAllLoans';
@@ -5,12 +7,11 @@ import { returnLoan } from '@/services/emprestimos/returnLoan';
 import {
   createContext,
   ReactNode,
+  use,
   useCallback,
   useContext,
-  useEffect,
   useState,
 } from 'react';
-
 interface ILoansContext {
   loans: ILoans[];
   isLoading: boolean;
@@ -20,26 +21,25 @@ interface ILoansContext {
 }
 
 export const ILoansContext = createContext<ILoansContext>({} as ILoansContext);
-
 interface IProps {
   children: ReactNode;
+  loansPromise: Promise<{ loans: ILoans[] }>;
 }
 
-export const LoansProvider: React.FC<IProps> = ({ children }) => {
-  const [loans, setLoans] = useState<ILoans[]>([]);
+export const LoansProvider: React.FC<IProps> = ({ children, loansPromise }) => {
+  const initialData = use(loansPromise);
+  const [loans, setLoans] = useState<ILoans[]>(initialData.loans);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const refreshLoans = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-
     try {
       const res = await getAllLoans({ take: 5, skip: 0 });
-
       setLoans(res.loans);
     } catch (error) {
-      setError('Erro ao buscar empréstimos. Tente noavemnte');
+      setError('Erro ao buscar empréstimos. Tente novamente');
     } finally {
       setIsLoading(false);
     }
@@ -48,10 +48,8 @@ export const LoansProvider: React.FC<IProps> = ({ children }) => {
   async function returnedLoan(id: string) {
     setIsLoading(true);
     setError(null);
-
     try {
       await returnLoan(id);
-
       setLoans((prev) =>
         prev.map((loan) =>
           loan.id === id
@@ -59,7 +57,6 @@ export const LoansProvider: React.FC<IProps> = ({ children }) => {
             : loan,
         ),
       );
-
       return true;
     } catch (error) {
       setError('Erro ao fazer a devolução.');
@@ -68,10 +65,6 @@ export const LoansProvider: React.FC<IProps> = ({ children }) => {
       setIsLoading(false);
     }
   }
-
-  useEffect(() => {
-    refreshLoans();
-  }, [refreshLoans]);
 
   return (
     <ILoansContext.Provider
@@ -84,6 +77,5 @@ export const LoansProvider: React.FC<IProps> = ({ children }) => {
 
 export function useLoansContext(): ILoansContext {
   const context = useContext(ILoansContext);
-
   return context;
 }

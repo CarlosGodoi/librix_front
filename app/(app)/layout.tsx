@@ -1,39 +1,20 @@
-'use client';
-
-import { AppShell } from '@/components/app-shell';
-import { useAuthContext } from '@/context/authContext';
-import { BooksProvider } from '@/context/BookContext';
-
-import { LoansProvider } from '@/context/loanContext';
-import { UsersProvider } from '@/context/userContext';
-import { useRouter } from 'next/navigation';
-import React, { useEffect } from 'react';
+import AppLayoutClient from './appLayoutClient';
+import { getAllUsersServer } from '@/services/usuarios/getAllUsersServer';
+import { getAllBooksServer } from '@/services/livros/getAllBooksServer';
+import { getAllLoansServer } from '@/services/emprestimos/getAllLoansServer';
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAuthContext();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!isLoading && !user) {
-      router.replace('/');
-    }
-  }, [isLoading, user, router]);
-
-  if (isLoading) {
-    return null;
-  }
-
-  if (!user) {
-    return null;
-  }
+  const usersPromise = getAllUsersServer({ take: 10, skip: 0 });
+  const booksPromise = getAllBooksServer({ take: 10, skip: 0 });
+  const loansPromise = getAllLoansServer({ take: 10, skip: 0 });
 
   return (
-    <BooksProvider>
-      <LoansProvider>
-        <UsersProvider>
-          <AppShell>{children}</AppShell>
-        </UsersProvider>
-      </LoansProvider>
-    </BooksProvider>
+    <AppLayoutClient
+      usersPromise={usersPromise}
+      booksPromise={booksPromise}
+      loansPromise={loansPromise}
+    >
+      {children}
+    </AppLayoutClient>
   );
 }

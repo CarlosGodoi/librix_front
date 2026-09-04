@@ -5,15 +5,16 @@ import {
   UserCreatePayload,
   UserUpdateFormPayload,
 } from '@/interfaces/users';
+import { deleteUser } from '@/services/usuarios/delete';
 import { getAllUsers } from '@/services/usuarios/getAll';
 import { registerUser } from '@/services/usuarios/registerUser';
 import { updateUser } from '@/services/usuarios/updateUser';
 import React, {
   createContext,
   ReactNode,
+  use,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from 'react';
@@ -32,22 +33,22 @@ interface IUsersContext {
   setFilter: React.Dispatch<React.SetStateAction<UserFilter>>;
   createUser: (data: UserCreatePayload) => Promise<IUser>;
   editUser: (id: string, data: UserUpdateFormPayload) => Promise<IUser>;
-  // getById: (id: string) => Promise<IUser>;
-  // delete: (id: string) => void;
+  removeUser: (id: string) => Promise<void>;
 }
 
 export const IUsersContext = createContext<IUsersContext>({} as IUsersContext);
-
 interface IProps {
   children: ReactNode;
+  usersPromise: Promise<{ users: IUser[] }>;
 }
 
-export const UsersProvider: React.FC<IProps> = ({ children }) => {
-  const [users, setUsers] = useState<IUser[]>([]);
-  const [filter, setFilter] = useState<UserFilter>({
-    name: '',
-    search: '',
-  });
+// Fica fora do componente: garante que a Promise só é criada uma vez,
+// não a cada render. Se preferir escopar por instância do provider,
+// dá pra usar useMemo/useState(() => ...) dentro do componente também.
+function UsersProvider({ children, usersPromise }: IProps) {
+  const initialData = use(usersPromise);
+  const [users, setUsers] = useState<IUser[]>(initialData.users);
+  const [filter, setFilter] = useState<UserFilter>({ name: '', search: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -81,14 +82,28 @@ export const UsersProvider: React.FC<IProps> = ({ children }) => {
     }
   }
 
+  async function removeUser(id: string) {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await deleteUser(id);
+      setUsers((prev) => prev.filter((user) => user.id !== id));
+    } catch (error) {
+      setError('Erro ao remover usuário.');
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  // Continua existindo para refetch manual (ex: botão "atualizar",
+  // ou após alguma ação externa) — isso não é fetch de montagem,
+  // então useCallback + chamada explícita continua correto.
   const refreshUsers = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-
     try {
       const response = await getAllUsers({ take: 10, skip: 0 });
-      console.log('Response_Users=>', response.data);
-
       setUsers(response.users);
     } catch (error) {
       setError('Erro ao buscar usuários.');
@@ -97,20 +112,13 @@ export const UsersProvider: React.FC<IProps> = ({ children }) => {
     }
   }, []);
 
-  useEffect(() => {
-    void refreshUsers();
-  }, [refreshUsers]);
-
   const visibleUsers = useMemo(() => {
     const query = filter.search.trim().toLowerCase();
-
     return users.filter((user) => {
       const matchesName =
         !filter.name ||
         user.name.toLowerCase().includes(filter.name.toLowerCase());
-
       const matchesQuery = !query || user.name.toLowerCase().includes(query);
-
       return matchesName && matchesQuery;
     });
   }, [filter, users]);
@@ -124,6 +132,7 @@ export const UsersProvider: React.FC<IProps> = ({ children }) => {
         error,
         createUser,
         editUser,
+        removeUser,
         setFilter,
         refreshUsers,
       }}
@@ -131,10 +140,10 @@ export const UsersProvider: React.FC<IProps> = ({ children }) => {
       {children}
     </IUsersContext.Provider>
   );
-};
+}
+
+export { UsersProvider };
 
 export function useUsersContext(): IUsersContext {
-  const context = useContext(IUsersContext);
-
-  return context;
+  return useContext(IUsersContext);
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useMemo, useOptimistic, useState, useTransition } from 'react';
 import { Search, Plus, Pencil, Trash2, Users } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -35,20 +35,26 @@ const initials = (name: string) =>
     .toUpperCase();
 
 export default function TableUsers() {
-  const { users } = useUsersContext();
+  const { users, removeUser } = useUsersContext();
+  const [isPending, startTransition] = useTransition();
   const { loans } = useLoansContext();
   const [query, setQuery] = useState('');
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<IUser | null>(null);
 
+  const [optimisticUsers, removeOptimisticUser] = useOptimistic(
+    users,
+    (state, id: string) => state.filter((user) => user.id !== id),
+  );
+
   const filtered = useMemo(
     () =>
-      users.filter(
+      optimisticUsers.filter(
         (user) =>
           user?.name?.toLowerCase().includes(query.toLowerCase()) ||
           user?.email?.toLowerCase().includes(query.toLowerCase()),
       ),
-    [users, query],
+    [optimisticUsers, query],
   );
 
   const loanCount = (memberId: string) =>
@@ -66,11 +72,17 @@ export default function TableUsers() {
     setOpen(true);
   };
 
-  //TODO Será implementado na sequência o metodo no contexto
-  // const handleDelete = (m: IUser) => {
-  //   deleteMember(m.id);
-  //   toast.success('Usuário removido.');
-  // };
+  const handleDelete = (user: IUser) => {
+    startTransition(async () => {
+      removeOptimisticUser(user.id);
+      try {
+        await removeUser(user.id);
+        toast.success('Usuário removido.');
+      } catch (error) {
+        toast.error('Erro ao remover usuário.');
+      }
+    });
+  };
 
   function StatusBadge({ status }: { status: STATUS }) {
     const map: Record<STATUS, string> = {
@@ -187,7 +199,8 @@ export default function TableUsers() {
                         size="icon"
                         className="size-8 text-destructive hover:bg-destructive/10 hover:text-destructive"
                         aria-label="Excluir"
-                        onClick={() => {}}
+                        onClick={() => handleDelete(user)}
+                        disabled={isPending}
                       >
                         <Trash2 className="size-4" />
                       </Button>

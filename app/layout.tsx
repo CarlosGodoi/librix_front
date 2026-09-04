@@ -5,6 +5,7 @@ import { ThemeProvider } from 'next-themes';
 import { ApiRequestProvider } from '@/context/apiRequestContext';
 import { AuthProvider } from '@/context/authContext';
 import { Toaster } from '@/components/ui/sonner';
+import { getUserServer } from '@/services/usuarios/getUserServer';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -30,11 +31,12 @@ export const vieport: Viewport = {
   ],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const initialUser = await getUserServer();
   return (
     <html
       lang="pt-BR"
@@ -43,7 +45,7 @@ export default function RootLayout({
     >
       <body className="font-sans antialiased">
         <ApiRequestProvider>
-          <AuthProvider>
+          <AuthProvider initialUser={initialUser}>
             <ThemeProvider
               attribute="class"
               defaultTheme="light"

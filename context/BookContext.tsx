@@ -11,6 +11,7 @@ import { uploadImageBook } from '@/services/livros/uploadImage';
 import {
   createContext,
   ReactNode,
+  use,
   useCallback,
   useContext,
   useEffect,
@@ -42,10 +43,12 @@ export const IBooksContext = createContext<IBooksContext>({} as IBooksContext);
 
 interface IProps {
   children: ReactNode;
+  booksPromise: Promise<{ books: IBook[] }>;
 }
 
-export const BooksProvider: React.FC<IProps> = ({ children }) => {
-  const [books, setBooks] = useState<IBook[]>([]);
+export const BooksProvider: React.FC<IProps> = ({ children, booksPromise }) => {
+  const initialData = use(booksPromise);
+  const [books, setBooks] = useState<IBook[]>(initialData.books);
   const [selectedBook, setSelectedBook] = useState<IBook>();
   const [filter, setFilter] = useState<BookFilter>({
     title: '',
@@ -134,10 +137,6 @@ export const BooksProvider: React.FC<IProps> = ({ children }) => {
     setSelectedBook(book);
     return book;
   }
-
-  useEffect(() => {
-    void refreshBooks();
-  }, [refreshBooks]);
 
   const visibleBooks = useMemo(() => {
     const query = filter.search.trim().toLowerCase();

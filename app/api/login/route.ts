@@ -10,7 +10,14 @@ export async function POST(req: NextRequest) {
 
     const { accessToken, refreshToken, user } = response.data;
 
-    const result = NextResponse.json({ user }, { status: 200 });
+    const safeUser = {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      profile: user.profile,
+    };
+
+    const result = NextResponse.json({ user: safeUser }, { status: 200 });
 
     result.cookies.set('token', accessToken, {
       httpOnly: true,
@@ -29,7 +36,7 @@ export async function POST(req: NextRequest) {
     });
 
     // cookie de usuário pode continuar legível pelo JS, já que não é sensível
-    result.cookies.set('user', JSON.stringify(user), {
+    result.cookies.set('user', JSON.stringify(safeUser), {
       path: '/',
       maxAge: 60 * 60 * 24,
     });
