@@ -20,7 +20,6 @@ import { PROFILE } from '@/enums/profile';
 import { IBook } from '@/interfaces/books';
 import { cn } from '@/lib/utils';
 import { categories } from '@/utils/categories/categories';
-import { count } from 'console';
 import {
   ArrowLeftRight,
   BookOpen,

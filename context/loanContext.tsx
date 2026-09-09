@@ -1,8 +1,14 @@
 'use client';
 
 import { LoanStatus } from '@/enums/loanStatus';
-import { ILoans, ReturnedLoanOutput } from '@/interfaces/loans';
+import {
+  ICreateLoanPayload,
+  ILoans,
+  Loan,
+  ReturnedLoanOutput,
+} from '@/interfaces/loans';
 import { getAllLoans } from '@/services/emprestimos/getAllLoans';
+import { registerLoan } from '@/services/emprestimos/registerLoan';
 import { returnLoan } from '@/services/emprestimos/returnLoan';
 import {
   createContext,
@@ -18,6 +24,7 @@ interface ILoansContext {
   error: string | null;
   refreshLoans: () => Promise<void>;
   returnedLoan: (id: string) => Promise<boolean>;
+  registerNewLoan: (data: ICreateLoanPayload) => Promise<Loan[] | null>;
 }
 
 export const ILoansContext = createContext<ILoansContext>({} as ILoansContext);
@@ -45,6 +52,24 @@ export const LoansProvider: React.FC<IProps> = ({ children, loansPromise }) => {
     }
   }, []);
 
+  async function registerNewLoan(
+    data: ICreateLoanPayload,
+  ): Promise<Loan[] | null> {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const newLoan = await registerLoan(data);
+      await refreshLoans();
+      return [newLoan];
+    } catch (error) {
+      setError('Erro ao registrar empréstimo. Tente novamente.');
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   async function returnedLoan(id: string) {
     setIsLoading(true);
     setError(null);
@@ -68,7 +93,14 @@ export const LoansProvider: React.FC<IProps> = ({ children, loansPromise }) => {
 
   return (
     <ILoansContext.Provider
-      value={{ loans, isLoading, refreshLoans, error, returnedLoan }}
+      value={{
+        loans,
+        isLoading,
+        refreshLoans,
+        error,
+        returnedLoan,
+        registerNewLoan,
+      }}
     >
       {children}
     </ILoansContext.Provider>
