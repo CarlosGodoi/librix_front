@@ -5,7 +5,7 @@ export async function POST() {
 
   result.cookies.delete('token');
   result.cookies.delete('refresh');
-  result.cookies.delete('usuario');
+  result.cookies.delete('user');
 
   return result;
 }

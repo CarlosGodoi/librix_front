@@ -67,12 +67,14 @@ const AuthProvider: React.FC<IProps> = ({ children, initialUser }) => {
   }
 
   async function signOut() {
-    await apiRequest('post', '/api/logout');
-
-    setUser(null);
-    deleteCookie('user');
-
-    router.push('/');
+    try {
+      await apiRequest('post', '/api/logout');
+    } finally {
+      setUser(null);
+      deleteCookie('user');
+      router.push('/');
+      router.refresh();
+    }
   }
 
   const updateUserContext = ({
