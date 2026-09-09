@@ -2,6 +2,7 @@
 
 import { BookFormOutput } from '@/app/(app)/livros/novo/schema/bookFormSchema';
 import { IBook, IUpdateBookPayload } from '@/interfaces/books';
+import { deleteBook } from '@/services/livros/delete';
 import { getAllBooks } from '@/services/livros/getAll';
 import { getBook } from '@/services/livros/getBookById';
 import { registerBook } from '@/services/livros/registerBook';
@@ -37,6 +38,7 @@ interface IBooksContext {
   editBook: (id: string, data: IUpdateBookPayload) => Promise<IBook>;
   uploadImage: (bookId: string, image: File) => Promise<IBook>;
   getBookById: (id: string) => Promise<IBook>;
+  removeBook: (id: string) => Promise<void>;
 }
 
 export const IBooksContext = createContext<IBooksContext>({} as IBooksContext);
@@ -138,6 +140,20 @@ export const BooksProvider: React.FC<IProps> = ({ children, booksPromise }) => {
     return book;
   }
 
+  async function removeBook(id: string) {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      await deleteBook(id);
+      setBooks((prev) => prev.filter((book) => book.id !== id));
+    } catch (error) {
+      setError('Erro ao excluir livro. Tente novamente.');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   const visibleBooks = useMemo(() => {
     const query = filter.search.trim().toLowerCase();
 
@@ -172,6 +188,7 @@ export const BooksProvider: React.FC<IProps> = ({ children, booksPromise }) => {
         editBook,
         uploadImage,
         getBookById,
+        removeBook,
         selectedBook,
       }}
     >

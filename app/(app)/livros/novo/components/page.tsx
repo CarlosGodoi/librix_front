@@ -32,7 +32,8 @@ type BookProps = { book?: IBook };
 export default function BookForm({ book }: BookProps) {
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
-  const { editBook, createBook, uploadImage } = useBooksContext();
+  const { editBook, createBook, uploadImage, removeBook, isLoading } =
+    useBooksContext();
   const router = useRouter();
   const isEdit = Boolean(book);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -144,6 +145,21 @@ export default function BookForm({ book }: BookProps) {
       setLoading(false);
     }
   }
+
+  const handleDeleteBook = async (id: string) => {
+    if (!book || book.id !== id) {
+      toast.error('Livro não encontrado.');
+      return;
+    }
+
+    try {
+      await removeBook(id);
+      toast.success('Livro excluído com sucesso.');
+      router.push('/livros');
+    } catch {
+      toast.error('Erro ao excluir livro. Tente novamente.');
+    }
+  };
 
   return (
     <div className="mx-auto max-w-3xl  space-y-6">
@@ -318,8 +334,9 @@ export default function BookForm({ book }: BookProps) {
             <Button
               type="button"
               variant="ghost"
-              onClick={() => {}}
+              onClick={() => handleDeleteBook(book?.id ?? '')}
               className="text-destructive hover:bg-destructive/10 hover:text-destructive"
+              disabled={isLoading}
             >
               <Trash2 className="size-4" />
               Excluir livro
