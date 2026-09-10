@@ -25,14 +25,7 @@ import {
   userSituationStatusLabel,
 } from '@/utils/status/translatestatus';
 import { UserFormDialog } from './userFormDialog';
-
-const initials = (name: string) =>
-  name
-    .split(' ')
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase();
+import { initials } from '@/utils/initialsName';
 
 export default function TableUsers() {
   const { users, removeUser } = useUsersContext();
@@ -57,9 +50,9 @@ export default function TableUsers() {
     [optimisticUsers, query],
   );
 
-  const loanCount = (memberId: string) =>
+  const loanCount = (userId: string) =>
     loans.filter(
-      (loan) => loan.userId === memberId && loan.status !== LoanStatus.RETURNED,
+      (loan) => loan.userId === userId && loan.status !== LoanStatus.RETURNED,
     ).length;
 
   const handleNew = () => {

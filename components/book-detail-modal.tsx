@@ -40,8 +40,6 @@ export function BookDetailModal({ book, open, onOpenChange }: Props) {
     },
   ];
 
-  console.log('ID_book=>', book.id);
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-3xl overflow-hidden p-0">

@@ -110,12 +110,10 @@ export default function NewLoanForm() {
         toast.success('Empréstimo registrado com sucesso!');
         router.push('/emprestimos');
       }
-    } catch (error) {
+    } catch {
       toast.error('Erro ao registrar empréstimo. Tente novamente.');
     }
   }
-
-  console.log('Form_error =>', errors);
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">
@@ -242,6 +240,7 @@ export default function NewLoanForm() {
                     fill
                     className="object-cover"
                     sizes="64px"
+                    unoptimized
                   />
                 </div>
                 <div className="min-w-0">

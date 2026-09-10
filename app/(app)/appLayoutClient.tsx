@@ -2,7 +2,6 @@
 
 import { AppShell } from '@/components/app-shell';
 import { AppShellSkeleton } from '@/components/app-shell-skeleton';
-import { useAuthContext } from '@/context/authContext';
 import { BooksProvider } from '@/context/BookContext';
 import { LoansProvider } from '@/context/loanContext';
 import { UsersProvider } from '@/context/userContext';
@@ -22,10 +21,6 @@ export default function AppLayoutClient({
   booksPromise,
   loansPromise,
 }: Props) {
-  const { user } = useAuthContext();
-
-  if (!user) return null;
-
   return (
     <Suspense fallback={<AppShellSkeleton />}>
       <UsersProvider usersPromise={usersPromise}>

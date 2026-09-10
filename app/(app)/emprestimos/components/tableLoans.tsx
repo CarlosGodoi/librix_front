@@ -1,7 +1,7 @@
 'use client';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Button, buttonVariants } from '@/components/ui/button';
+import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
@@ -15,6 +15,7 @@ import { useLoansContext } from '@/context/loanContext';
 import { LoanStatus } from '@/enums/loanStatus';
 import { Loan } from '@/interfaces/loans';
 import { cn } from '@/lib/utils';
+import { initials } from '@/utils/initialsName';
 import { loanStatusLabel } from '@/utils/status/translatestatus';
 import {
   BookMarked,
@@ -22,19 +23,11 @@ import {
   CheckCircle2,
   Plus,
   RotateCcw,
+  User,
 } from 'lucide-react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
-
-const initials = (name: string) =>
-  name
-    .split(' ')
-    .slice(0, 2)
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase();
 
 const formatDate = (value: string | Date | null | undefined) => {
   if (!value) return '-';
@@ -180,7 +173,7 @@ export default function TableLoans() {
             <TableBody>
               {filtered.map((loan) => {
                 const book = loan.book;
-                const member = loan.user;
+                const user = loan.user;
                 return (
                   <TableRow key={loan.id}>
                     <TableCell>
@@ -198,6 +191,7 @@ export default function TableLoans() {
                               fill
                               className="object-cover"
                               sizes="36px"
+                              unoptimized
                             />
                           )}
                         </div>
@@ -215,11 +209,11 @@ export default function TableLoans() {
                       <div className="flex items-center gap-2.5">
                         <Avatar className="size-7">
                           <AvatarFallback className="bg-primary/10 text-[10px] font-semibold text-primary">
-                            {member ? initials(member.name) : '?'}
+                            {user ? initials(user.name) : '?'}
                           </AvatarFallback>
                         </Avatar>
                         <span className="text-sm">
-                          {member?.name ?? 'Removido'}
+                          {user?.name ?? 'Removido'}
                         </span>
                       </div>
                     </TableCell>

@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const BASE_API = process.env.NEXT_PUBLIC_BASE_API || 'http://localhost:3334';
 
-const PROTECTED_ROUTES = ['/livors', '/emprestimos', '/usuarios'];
+const PROTECTED_ROUTES = ['/livros', '/emprestimos', '/usuarios'];
 
 function isProtectedRoute(pathname: string) {
   return PROTECTED_ROUTES.some((route) => pathname.startsWith(`${route}/`));
@@ -75,7 +75,26 @@ export async function proxy(req: NextRequest) {
       throw new Error('Access token não retornado pelo servidor.');
     }
 
-    const nextResponse = NextResponse.next();
+    const requestHeaders = new Headers(req.headers);
+
+    const cookies = req.cookies
+      .getAll()
+      .map(({ name, value }) => {
+        if (name === 'token') {
+          return `${name}=${accessToken}`;
+        }
+
+        return `${name}=${value}`;
+      })
+      .join('; ');
+
+    requestHeaders.set('cookie', cookies);
+
+    const nextResponse = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
 
     nextResponse.cookies.set('token', accessToken, {
       httpOnly: true,

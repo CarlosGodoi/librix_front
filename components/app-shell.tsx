@@ -17,6 +17,7 @@ import React, { useState } from 'react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from './theme-toggle';
+import { initials } from '@/utils/initialsName';
 
 const nav = [
   { href: '/livros', label: 'Acervo', icon: LayoutDashboard },
@@ -31,15 +32,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { user, signOut } = useAuthContext();
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  const initials = user
-    ? user.name
-        .split(' ')
-        .slice(0, 2)
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase()
-    : 'BB';
 
   const handleLogout = () => {
     signOut();
@@ -91,7 +83,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="flex items-center gap-3 rounded-lg px-2 py-2">
           <Avatar className="size-9">
             <AvatarFallback className="bg-primary/10 text-xs font-semibold text-primary">
-              {initials}
+              {initials(user?.name ?? '')}
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1 leading-tight">

@@ -15,7 +15,6 @@ export async function getAllUsersServer({
   search,
 }: IGetAllUsersParams) {
   const cookieStore = await cookies();
-
   const accessToken = cookieStore.get('token')?.value;
 
   if (!accessToken) {
