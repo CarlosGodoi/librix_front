@@ -246,4 +246,4 @@ O `next.config.ts` está configurado com `typescript.ignoreBuildErrors: true`, p
 
 ## Licença
 
-Não há um arquivo de licença neste repositório. Defina a licença antes de distribuir o projeto publicamente.
+MIT.
