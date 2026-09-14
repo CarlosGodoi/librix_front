@@ -46,7 +46,7 @@ export default function NewLoanForm() {
   const [selectedBook, setSelectedBook] = useState<IBook | undefined>();
   const [loadingBook, setLoadingBook] = useState(false);
 
-  const initialBookId = params.get('bookId') ?? '';
+  const initialBookId = params.get('book') ?? '';
 
   const form = useForm<LoanFormInput>({
     resolver: zodResolver(loanFormInputSchema),
@@ -110,10 +110,17 @@ export default function NewLoanForm() {
         toast.success('Empréstimo registrado com sucesso!');
         router.push('/emprestimos');
       }
-    } catch {
+    } catch (error) {
+      console.error('Erro ao buscar livro:', error);
       toast.error('Erro ao registrar empréstimo. Tente novamente.');
     }
   }
+
+  useEffect(() => {
+    if (initialBookId) {
+      form.setValue('bookId', initialBookId, { shouldValidate: true });
+    }
+  }, [initialBookId]);
 
   return (
     <div className="mx-auto max-w-4xl space-y-6">

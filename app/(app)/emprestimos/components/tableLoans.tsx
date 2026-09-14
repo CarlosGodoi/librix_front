@@ -21,9 +21,7 @@ import {
   BookMarked,
   CalendarClock,
   CheckCircle2,
-  Plus,
   RotateCcw,
-  User,
 } from 'lucide-react';
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
@@ -208,7 +206,7 @@ export default function TableLoans() {
                     <TableCell className="hidden md:table-cell">
                       <div className="flex items-center gap-2.5">
                         <Avatar className="size-7">
-                          <AvatarFallback className="bg-primary/10 text-[10px] font-semibold text-primary">
+                          <AvatarFallback className="bg-primary/10 text-[12px] font-semibold text-primary">
                             {user ? initials(user.name) : '?'}
                           </AvatarFallback>
                         </Avatar>
