@@ -3,13 +3,15 @@ import 'server-only';
 import { cookies } from 'next/headers';
 import api from '@/services/api';
 import { TUser } from '@/context/authContext';
+import { isAxiosError } from 'axios';
 
 export async function getUserServer(): Promise<TUser | null> {
   const cookieStore = await cookies();
 
   const userCookie = cookieStore.get('user')?.value;
+  const accessToken = cookieStore.get('token')?.value;
 
-  if (!userCookie) {
+  if (!userCookie || !accessToken) {
     return null;
   }
 
@@ -17,12 +19,6 @@ export async function getUserServer(): Promise<TUser | null> {
     const user = JSON.parse(userCookie) as { id: string };
 
     if (!user.id) {
-      return null;
-    }
-
-    const accessToken = cookieStore.get('token')?.value;
-
-    if (!accessToken) {
       return null;
     }
 
@@ -34,9 +30,19 @@ export async function getUserServer(): Promise<TUser | null> {
 
     const { id, name, email, profile } = response.data.user;
 
-    return { id, name, email, profile };
+    return {
+      id,
+      name,
+      email,
+      profile,
+    };
   } catch (error) {
-    console.log('Sessão inválida ou expirada.');
+    if (isAxiosError(error) && error.response?.status === 401) {
+      return null;
+    }
+
+    console.error('SERVER USER ERROR:', error);
+
     return null;
   }
 }

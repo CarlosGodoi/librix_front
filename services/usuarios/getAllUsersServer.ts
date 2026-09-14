@@ -17,20 +17,28 @@ export async function getAllUsersServer({
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('token')?.value;
 
-  if (!accessToken) {
-    throw new Error('Usuário não autenticado');
+  try {
+    console.log('SERVER USERS TOKEN EXISTS:', !!accessToken);
+
+    if (!accessToken) {
+      throw new Error('Usuário não autenticado');
+    }
+
+    const response = await api.get('/users', {
+      params: {
+        take,
+        skip,
+        ...(search ? { search } : {}),
+      },
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('SERVER USER ERROR:', error);
+    console.log('Sessão inválida ou expirada.');
+    return null;
   }
-
-  const response = await api.get('/users', {
-    params: {
-      take,
-      skip,
-      ...(search ? { search } : {}),
-    },
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-
-  return response.data;
 }

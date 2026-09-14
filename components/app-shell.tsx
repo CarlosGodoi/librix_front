@@ -1,4 +1,4 @@
-import { useAuthContext } from '@/context/authContext';
+import { TUser, useAuthContext } from '@/context/authContext';
 import { cn } from '@/lib/utils';
 import {
   ArrowLeftRight,
@@ -18,20 +18,40 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from './theme-toggle';
 import { initials } from '@/utils/initialsName';
+import { PROFILE } from '@/enums/profile';
 
-const nav = [
-  { href: '/livros', label: 'Acervo', icon: LayoutDashboard },
-  { href: '/livros/novo', label: 'Cadastrar livro', icon: BookPlus },
-  { href: '/usuarios', label: 'Usuários', icon: Users },
-  { href: '/emprestimos/novo', label: 'Novo empréstimo', icon: ArrowLeftRight },
-  { href: '/emprestimos', label: 'Empréstimos', icon: BookMarked },
-];
+interface AppShellProps {
+  children: React.ReactNode;
+  userRole?: TUser | null | undefined;
+}
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({ children, userRole }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, signOut } = useAuthContext();
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const ISBLOQUED = userRole?.profile === PROFILE.VISITOR;
+
+  const nav = [
+    { href: '/livros', label: 'Acervo', icon: LayoutDashboard },
+    ISBLOQUED
+      ? null
+      : { href: '/livros/novo', label: 'Cadastrar livro', icon: BookPlus },
+    ISBLOQUED ? null : { href: '/usuarios', label: 'Usuários', icon: Users },
+    ISBLOQUED
+      ? null
+      : {
+          href: '/emprestimos/novo',
+          label: 'Novo empréstimo',
+          icon: ArrowLeftRight,
+        },
+    {
+      href: '/emprestimos',
+      label: ISBLOQUED ? 'Meus empréstimos' : 'Empréstimos',
+      icon: BookMarked,
+    },
+  ];
 
   const handleLogout = () => {
     signOut();
@@ -57,6 +77,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
       <nav className="flex-1 space-y-1 px-3">
         {nav.map((item) => {
+          if (!item) return null;
           const Icon = item.icon;
           const active = isActive(item.href);
 

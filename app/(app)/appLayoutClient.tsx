@@ -2,6 +2,7 @@
 
 import { AppShell } from '@/components/app-shell';
 import { AppShellSkeleton } from '@/components/app-shell-skeleton';
+import { TUser } from '@/context/authContext';
 import { BooksProvider } from '@/context/BookContext';
 import { LoansProvider } from '@/context/loanContext';
 import { UsersProvider } from '@/context/userContext';
@@ -13,6 +14,7 @@ interface Props {
   usersPromise: Promise<{ users: IUser[] }>;
   booksPromise: Promise<any>;
   loansPromise: Promise<any>;
+  user?: TUser | null | undefined;
 }
 
 export default function AppLayoutClient({
@@ -20,13 +22,14 @@ export default function AppLayoutClient({
   usersPromise,
   booksPromise,
   loansPromise,
+  user,
 }: Props) {
   return (
     <Suspense fallback={<AppShellSkeleton />}>
       <UsersProvider usersPromise={usersPromise}>
         <BooksProvider booksPromise={booksPromise}>
           <LoansProvider loansPromise={loansPromise}>
-            <AppShell>{children}</AppShell>
+            <AppShell userRole={user}>{children}</AppShell>
           </LoansProvider>
         </BooksProvider>
       </UsersProvider>

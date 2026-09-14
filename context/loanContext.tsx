@@ -1,12 +1,7 @@
 'use client';
 
 import { LoanStatus } from '@/enums/loanStatus';
-import {
-  ICreateLoanPayload,
-  ILoans,
-  Loan,
-  ReturnedLoanOutput,
-} from '@/interfaces/loans';
+import { ICreateLoanPayload, ILoans, Loan } from '@/interfaces/loans';
 import { getAllLoans } from '@/services/emprestimos/getAllLoans';
 import { registerLoan } from '@/services/emprestimos/registerLoan';
 import { returnLoan } from '@/services/emprestimos/returnLoan';

@@ -34,7 +34,7 @@ export async function PUT(
 
     return NextResponse.json(
       {
-        error: 'Erro ao processar mensagem.',
+        error: 'Erro ao processar dados.',
       },
       {
         status: 500,
