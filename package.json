@@ -2,6 +2,8 @@
   "name": "librix_front",
   "version": "0.1.0",
   "private": true,
+  "author": "Carlos Eduardo Godoi",
+  "license": "MIT",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
