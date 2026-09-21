@@ -11,10 +11,11 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { TUser } from '@/context/authContext';
 import { useLoansContext } from '@/context/loanContext';
 import { LoanStatus } from '@/enums/loanStatus';
+import { PROFILE } from '@/enums/profile';
 import { Loan } from '@/interfaces/loans';
-import { cn } from '@/lib/utils';
 import { initials } from '@/utils/initialsName';
 import { loanStatusLabel } from '@/utils/status/translatestatus';
 import {
@@ -26,6 +27,10 @@ import {
 import Image from 'next/image';
 import { useMemo, useState } from 'react';
 import { toast } from 'sonner';
+
+interface TableProps {
+  userRole?: TUser | null | undefined;
+}
 
 const formatDate = (value: string | Date | null | undefined) => {
   if (!value) return '-';
@@ -88,12 +93,14 @@ function StatusBadge({ status }: { status: LoanStatus }) {
   );
 }
 
-export default function TableLoans() {
+export default function TableLoans({ userRole }: TableProps) {
   const { loans, returnedLoan } = useLoansContext();
   const safeLoans = loans ?? [];
   const [tab, setTab] = useState<
     'todos' | 'ativos' | 'atrasados' | 'devolvidos'
   >('todos');
+
+  const ISBLOQUED = userRole?.profile === PROFILE.VISITOR;
 
   const enriched = useMemo(
     () =>
@@ -125,6 +132,8 @@ export default function TableLoans() {
   });
 
   const handleReturn = (loanId: string) => {
+    if (ISBLOQUED) return;
+
     returnedLoan(loanId);
     toast.success('Devolução registrada.');
   };
@@ -240,6 +249,7 @@ export default function TableLoans() {
                           variant="outline"
                           size="sm"
                           onClick={() => handleReturn(loan.id)}
+                          disabled={ISBLOQUED}
                         >
                           <RotateCcw className="size-3.5" />
                           Devolver

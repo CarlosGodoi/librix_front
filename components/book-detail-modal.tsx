@@ -13,17 +13,18 @@ import Image from 'next/image';
 import { Badge } from './ui/badge';
 import { AvailabilityBadge } from './availability-badge';
 import { Button } from './ui/button';
-import { useLoansContext } from '@/context/loanContext';
+import { TUser } from '@/context/authContext';
+import { PROFILE } from '@/enums/profile';
 
 type Props = {
   book: IBook | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  userRole?: TUser | null | undefined;
 };
 
-export function BookDetailModal({ book, open, onOpenChange }: Props) {
+export function BookDetailModal({ book, open, onOpenChange, userRole }: Props) {
   const router = useRouter();
-  const { loans } = useLoansContext();
   if (!book) return null;
 
   const dateString = String(book?.year);
@@ -39,6 +40,8 @@ export function BookDetailModal({ book, open, onOpenChange }: Props) {
       value: book.copies,
     },
   ];
+
+  const ISBLOQUED = userRole?.profile === PROFILE.VISITOR;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -105,13 +108,14 @@ export function BookDetailModal({ book, open, onOpenChange }: Props) {
                   onOpenChange(false);
                   router.push(`/livros/${book.id}/editar`);
                 }}
+                disabled={ISBLOQUED}
               >
                 <Pencil className="size-4" />
                 Editar
               </Button>
               <Button
                 className="flex-1"
-                disabled={book.copies <= 0}
+                disabled={book.copies <= 0 || ISBLOQUED}
                 onClick={() => {
                   onOpenChange(false);
                   router.push(`/emprestimos/novo?book=${book.id}`);

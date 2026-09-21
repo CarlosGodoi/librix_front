@@ -26,6 +26,8 @@ import { formatISBN } from '@/utils/formatISBN';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useBooksContext } from '@/context/BookContext';
+import { TUser } from '@/context/authContext';
+import { PROFILE } from '@/enums/profile';
 
 type BookProps = { book?: IBook };
 

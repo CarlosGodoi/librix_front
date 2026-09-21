@@ -196,7 +196,12 @@ export default function BooksPage() {
           ))}
         </div>
       )}
-      <BookDetailModal book={selected} open={open} onOpenChange={setOpen} />
+      <BookDetailModal
+        book={selected}
+        open={open}
+        onOpenChange={setOpen}
+        userRole={user}
+      />
 
       {user?.profile === PROFILE.VISITOR && <BookRecommenderChat />}
     </div>
