@@ -102,9 +102,7 @@ export function BookRecommenderChat() {
   async function submit(text: string) {
     const value = text.trim();
 
-    if (!value || isChatLoading) {
-      return;
-    }
+    if (!value || isBusy) return;
 
     if (!user?.id) {
       addMessage('assistant', 'Não consegui identificar o usuário atual.');
@@ -114,13 +112,27 @@ export function BookRecommenderChat() {
 
     // mensagem do usuário
     addMessage('user', value);
-
     // limpa input
     setInput('');
 
+    const isHistoryRequest =
+      value === 'Sugira livros com base nas minhas últimas leituras';
+
+    if (isHistoryRequest) {
+      try {
+        await fetchRecommendations(user.id);
+      } catch (error) {
+        console.error('ERRO NAS RECOMENDAÇÕES:', error);
+        addMessage(
+          'assistant',
+          'Desculpe, não consegui gerar recomendações agora.',
+        );
+      }
+      return;
+    }
+
     try {
       const response = await sendChatMessage(user.id, value);
-
       // resposta da IA
       addMessage('assistant', response.message, response.books);
 
@@ -139,7 +151,6 @@ export function BookRecommenderChat() {
 
   return (
     <>
-      {/* Botão flutuante */}
       {/* Botão flutuante */}
       <button
         type="button"
