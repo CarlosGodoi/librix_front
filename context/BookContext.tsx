@@ -1,7 +1,8 @@
 'use client';
 
 import { BookFormOutput } from '@/app/(app)/livros/novo/schema/bookFormSchema';
-import { IBook, IUpdateBookPayload } from '@/interfaces/books';
+import { BOOKS_PAGE_SIZE } from '@/constants/pagination';
+import { BooksResponse, IBook, IUpdateBookPayload } from '@/interfaces/books';
 import { deleteBook } from '@/services/livros/delete';
 import { getAllBooks } from '@/services/livros/getAll';
 import { getBook } from '@/services/livros/getBookById';
@@ -15,7 +16,6 @@ import {
   use,
   useCallback,
   useContext,
-  useEffect,
   useMemo,
   useState,
 } from 'react';
@@ -32,6 +32,9 @@ interface IBooksContext {
   isLoading: boolean;
   error: string | null;
   selectedBook: IBook | undefined;
+  page: number;
+  totalPages: number;
+  goToPage: (page: number) => void;
   setFilter: React.Dispatch<React.SetStateAction<BookFilter>>;
   refreshBooks: () => Promise<void>;
   createBook: (data: BookFormOutput) => Promise<IBook>;
@@ -45,12 +48,14 @@ export const IBooksContext = createContext<IBooksContext>({} as IBooksContext);
 
 interface IProps {
   children: ReactNode;
-  booksPromise: Promise<{ books: IBook[] }>;
+  booksPromise: Promise<BooksResponse>;
 }
 
 export const BooksProvider: React.FC<IProps> = ({ children, booksPromise }) => {
   const initialData = use(booksPromise);
   const [books, setBooks] = useState<IBook[]>(initialData.books);
+  const [totalPages, setTotalPages] = useState(initialData.totalPage);
+  const [page, setPage] = useState(1);
   const [selectedBook, setSelectedBook] = useState<IBook>();
   const [filter, setFilter] = useState<BookFilter>({
     title: '',
@@ -60,14 +65,20 @@ export const BooksProvider: React.FC<IProps> = ({ children, booksPromise }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const refreshBooks = useCallback(async () => {
+  const fetchBooks = useCallback(async (targetPage: number) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const res = await getAllBooks({ take: 12, skip: 0 });
+      const skip = (targetPage - 1) * BOOKS_PAGE_SIZE;
+      const res: BooksResponse = await getAllBooks({
+        take: BOOKS_PAGE_SIZE,
+        skip: targetPage,
+      });
 
       setBooks(res.books);
+      setTotalPages(res.totalPage);
+      setPage(targetPage);
     } catch (error) {
       setError('Erro ao buscar livros. Tente novamente.');
     } finally {
@@ -75,12 +86,25 @@ export const BooksProvider: React.FC<IProps> = ({ children, booksPromise }) => {
     }
   }, []);
 
+  const refreshBooks = useCallback(() => fetchBooks(page), [fetchBooks, page]);
+
+  const goToPage = useCallback(
+    (targetPage: number) => {
+      if (targetPage < 1 || targetPage > totalPages || targetPage === page) {
+        return;
+      }
+      fetchBooks(targetPage);
+    },
+    [fetchBooks, totalPages, page],
+  );
+
   async function createBook(data: BookFormOutput) {
     setIsLoading(true);
     setError(null);
     try {
       const created = await registerBook(data);
-      setBooks((prev) => [...prev, created]);
+      await fetchBooks(page);
+
       return created;
     } catch (error) {
       setError('Erro ao cadastrar livro.');
@@ -146,7 +170,9 @@ export const BooksProvider: React.FC<IProps> = ({ children, booksPromise }) => {
 
     try {
       await deleteBook(id);
-      setBooks((prev) => prev.filter((book) => book.id !== id));
+
+      const isLastItemOfPage = books.length === 1 && page > 1;
+      await fetchBooks(isLastItemOfPage ? page - 1 : page);
     } catch (error) {
       setError('Erro ao excluir livro. Tente novamente.');
     } finally {
@@ -182,6 +208,9 @@ export const BooksProvider: React.FC<IProps> = ({ children, booksPromise }) => {
         filter,
         isLoading,
         error,
+        page,
+        totalPages,
+        goToPage,
         setFilter,
         refreshBooks,
         createBook,

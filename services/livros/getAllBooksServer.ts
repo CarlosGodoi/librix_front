@@ -2,6 +2,7 @@ import 'server-only';
 
 import { cookies } from 'next/headers';
 import api from '@/services/api';
+import { BooksResponse } from '@/interfaces/books';
 
 interface IGetAllBooksParams {
   take: number;
@@ -13,7 +14,7 @@ export async function getAllBooksServer({
   take,
   skip,
   search,
-}: IGetAllBooksParams) {
+}: IGetAllBooksParams): Promise<BooksResponse> {
   const cookieStore = await cookies();
 
   const accessToken = cookieStore.get('token')?.value;

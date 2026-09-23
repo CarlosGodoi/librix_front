@@ -4,6 +4,7 @@ import { getAllBooksServer } from '@/services/livros/getAllBooksServer';
 import { getAllLoansServer } from '@/services/emprestimos/getAllLoansServer';
 import { getUserServer } from '@/services/usuarios/getUserServer';
 import { getLoansByUserIdServer } from '@/services/emprestimos/getLoanByIdServer';
+import { BOOKS_PAGE_SIZE } from '@/constants/pagination';
 
 export default async function AppLayout({
   children,
@@ -17,7 +18,7 @@ export default async function AppLayout({
   const usersPromise = canListUsers
     ? getAllUsersServer({ take: 10, skip: 0 })
     : Promise.resolve({ users: [] });
-  const booksPromise = getAllBooksServer({ take: 10, skip: 0 });
+  const booksPromise = getAllBooksServer({ take: BOOKS_PAGE_SIZE, skip: 1 });
   const loansPromise =
     canListUsers || !user?.id
       ? getAllLoansServer({ take: 10, skip: 0 })

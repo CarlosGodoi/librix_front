@@ -31,3 +31,9 @@ export interface IUpdateBookPayload {
   copies: number;
   synopsis: string;
 }
+
+export interface BooksResponse {
+  books: IBook[];
+  total: number;
+  totalPage: number;
+}
