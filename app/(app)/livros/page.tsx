@@ -3,7 +3,7 @@
 import { AvailabilityBadge } from '@/components/availability-badge';
 import { BookDetailModal } from '@/components/book-detail-modal';
 import { BookRecommenderChat } from '@/components/book-recommender-chat';
-import { BooksPagination } from '@/components/pagintion';
+import { BooksPagination } from '@/components/pagination';
 import { buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
