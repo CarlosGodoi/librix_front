@@ -3,6 +3,7 @@
 import { AvailabilityBadge } from '@/components/availability-badge';
 import { BookDetailModal } from '@/components/book-detail-modal';
 import { BookRecommenderChat } from '@/components/book-recommender-chat';
+import { BooksPagination } from '@/components/pagintion';
 import { buttonVariants } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -43,6 +44,7 @@ export default function BooksPage() {
   const deferredQuery = useDeferredValue(query);
 
   const FALLBACK_COVER = '/covers/placeholder.png';
+  const ISBLOQUED = user?.profile === PROFILE.VISITOR;
 
   const stats = [
     { label: 'Livros no acervo', value: books.length, icon: Library },
@@ -94,10 +96,14 @@ export default function BooksPage() {
             Livros adicionados recentemente à biblioteca.
           </p>
         </div>
-        <Link href="/livros/novo" className={cn(buttonVariants())}>
-          <Plus className="size-4" />
-          Cadastrar livro
-        </Link>
+        {ISBLOQUED ? (
+          <div></div>
+        ) : (
+          <Link href="/livros/novo" className={cn(buttonVariants())}>
+            <Plus className="size-4" />
+            Cadastrar livro
+          </Link>
+        )}
       </div>
       <div className="grid gap-4 sm:grid-cols-3">
         {stats.map((s) => {
@@ -196,6 +202,8 @@ export default function BooksPage() {
           ))}
         </div>
       )}
+      <BooksPagination />
+
       <BookDetailModal
         book={selected}
         open={open}

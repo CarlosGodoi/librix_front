@@ -100,31 +100,34 @@ export function BookDetailModal({ book, open, onOpenChange, userRole }: Props) {
               })}
             </div>
 
-            <div className="mt-auto flex gap-2">
-              <Button
-                variant="outline"
-                className="flex-1"
-                onClick={() => {
-                  onOpenChange(false);
-                  router.push(`/livros/${book.id}/editar`);
-                }}
-                disabled={ISBLOQUED}
-              >
-                <Pencil className="size-4" />
-                Editar
-              </Button>
-              <Button
-                className="flex-1"
-                disabled={book.copies <= 0 || ISBLOQUED}
-                onClick={() => {
-                  onOpenChange(false);
-                  router.push(`/emprestimos/novo?book=${book.id}`);
-                }}
-              >
-                <ArrowLeftRight className="size-4" />
-                Emprestar
-              </Button>
-            </div>
+            {ISBLOQUED ? (
+              <div></div>
+            ) : (
+              <div className="mt-auto flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    onOpenChange(false);
+                    router.push(`/livros/${book.id}/editar`);
+                  }}
+                >
+                  <Pencil className="size-4" />
+                  Editar
+                </Button>
+                <Button
+                  className="flex-1"
+                  disabled={book.copies <= 0}
+                  onClick={() => {
+                    onOpenChange(false);
+                    router.push(`/emprestimos/novo?book=${book.id}`);
+                  }}
+                >
+                  <ArrowLeftRight className="size-4" />
+                  Emprestar
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </DialogContent>
