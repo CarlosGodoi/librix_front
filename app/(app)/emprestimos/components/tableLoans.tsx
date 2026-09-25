@@ -100,7 +100,7 @@ export default function TableLoans({ userRole }: TableProps) {
     'todos' | 'ativos' | 'atrasados' | 'devolvidos'
   >('todos');
 
-  const ISBLOQUED = userRole?.profile === PROFILE.VISITOR;
+  const ISDENIED = userRole?.profile === PROFILE.VISITOR;
 
   const enriched = useMemo(
     () =>
@@ -132,7 +132,7 @@ export default function TableLoans({ userRole }: TableProps) {
   });
 
   const handleReturn = (loanId: string) => {
-    if (ISBLOQUED) return;
+    if (ISDENIED) return;
 
     returnedLoan(loanId);
     toast.success('Devolução registrada.');
@@ -249,7 +249,7 @@ export default function TableLoans({ userRole }: TableProps) {
                           variant="outline"
                           size="sm"
                           onClick={() => handleReturn(loan.id)}
-                          disabled={ISBLOQUED}
+                          disabled={ISDENIED}
                         >
                           <RotateCcw className="size-3.5" />
                           Devolver

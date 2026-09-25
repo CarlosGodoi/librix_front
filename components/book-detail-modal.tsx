@@ -41,7 +41,7 @@ export function BookDetailModal({ book, open, onOpenChange, userRole }: Props) {
     },
   ];
 
-  const ISBLOQUED = userRole?.profile === PROFILE.VISITOR;
+  const ISDENIED = userRole?.profile === PROFILE.VISITOR;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -100,7 +100,7 @@ export function BookDetailModal({ book, open, onOpenChange, userRole }: Props) {
               })}
             </div>
 
-            {ISBLOQUED ? (
+            {ISDENIED ? (
               <div></div>
             ) : (
               <div className="mt-auto flex gap-2">

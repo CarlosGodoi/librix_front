@@ -44,7 +44,7 @@ export default function BooksPage() {
   const deferredQuery = useDeferredValue(query);
 
   const FALLBACK_COVER = '/covers/placeholder.png';
-  const ISBLOQUED = user?.profile === PROFILE.VISITOR;
+  const ISDENIED = user?.profile === PROFILE.VISITOR;
 
   const stats = [
     { label: 'Livros no acervo', value: books.length, icon: Library },
@@ -96,7 +96,7 @@ export default function BooksPage() {
             Livros adicionados recentemente à biblioteca.
           </p>
         </div>
-        {ISBLOQUED ? (
+        {ISDENIED ? (
           <div></div>
         ) : (
           <Link href="/livros/novo" className={cn(buttonVariants())}>
