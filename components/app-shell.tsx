@@ -8,6 +8,7 @@ import {
   Library,
   LogOut,
   Menu,
+  User,
   Users,
   X,
 } from 'lucide-react';
@@ -31,15 +32,18 @@ export function AppShell({ children, userRole }: AppShellProps) {
   const { user, signOut } = useAuthContext();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  const ISBLOQUED = userRole?.profile === PROFILE.VISITOR;
+  const ISDENIED = userRole?.profile === PROFILE.VISITOR;
+  const ISVISIBLE =
+    userRole?.profile !== PROFILE.ADMIN &&
+    userRole?.profile !== PROFILE.LIBRARIAN;
 
   const nav = [
     { href: '/livros', label: 'Acervo', icon: LayoutDashboard },
-    ISBLOQUED
+    ISDENIED
       ? null
       : { href: '/livros/novo', label: 'Cadastrar livro', icon: BookPlus },
-    ISBLOQUED ? null : { href: '/usuarios', label: 'Usuários', icon: Users },
-    ISBLOQUED
+    ISDENIED ? null : { href: '/usuarios', label: 'Usuários', icon: Users },
+    ISDENIED
       ? null
       : {
           href: '/emprestimos/novo',
@@ -48,9 +52,16 @@ export function AppShell({ children, userRole }: AppShellProps) {
         },
     {
       href: '/emprestimos',
-      label: ISBLOQUED ? 'Meus empréstimos' : 'Empréstimos',
+      label: ISDENIED ? 'Meus empréstimos' : 'Empréstimos',
       icon: BookMarked,
     },
+    ISVISIBLE
+      ? {
+          href: '/perfil',
+          label: 'Perfil',
+          icon: User,
+        }
+      : null,
   ];
 
   const handleLogout = () => {
