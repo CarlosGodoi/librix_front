@@ -5,6 +5,7 @@ import {
   UserCreatePayload,
   UserUpdateFormPayload,
 } from '@/interfaces/users';
+import { getUser } from '@/services/profile/getUserById';
 import { deleteUser } from '@/services/usuarios/delete';
 import { getAllUsers } from '@/services/usuarios/getAll';
 import { registerUser } from '@/services/usuarios/registerUser';
@@ -26,12 +27,14 @@ interface UserFilter {
 
 interface IUsersContext {
   users: IUser[];
+  user: IUser;
   filter: UserFilter;
   isLoading: boolean;
   error: string | null;
   refreshUsers: () => Promise<void>;
   setFilter: React.Dispatch<React.SetStateAction<UserFilter>>;
   createUser: (data: UserCreatePayload) => Promise<IUser>;
+  getUserById: () => Promise<IUser>;
   editUser: (id: string, data: UserUpdateFormPayload) => Promise<IUser>;
   removeUser: (id: string) => Promise<void>;
 }
@@ -48,11 +51,12 @@ interface IProps {
 function UsersProvider({ children, usersPromise }: IProps) {
   const initialData = use(usersPromise);
   const [users, setUsers] = useState<IUser[]>(initialData.users);
+  const [user, setUser] = useState<IUser>({} as IUser);
   const [filter, setFilter] = useState<UserFilter>({ name: '', search: '' });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function createUser(data: UserCreatePayload) {
+  const createUser = useCallback(async (data: UserCreatePayload) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -65,24 +69,44 @@ function UsersProvider({ children, usersPromise }: IProps) {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, []);
 
-  async function editUser(id: string, data: UserUpdateFormPayload) {
+  const getUserById = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const updated = await updateUser(id, data);
-      setUsers((prev) => prev.map((user) => (user.id === id ? updated : user)));
-      return updated;
+      const result = await getUser();
+      setUser(result);
+      return result;
     } catch (error) {
-      setError('Erro ao editar dados do usuário.');
+      setError('Erro ao buscar dados do usuário.');
       throw error;
     } finally {
       setIsLoading(false);
     }
-  }
+  }, []);
 
-  async function removeUser(id: string) {
+  const editUser = useCallback(
+    async (id: string, data: UserUpdateFormPayload) => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const updated = await updateUser(id, data);
+        setUsers((prev) =>
+          prev.map((user) => (user.id === id ? updated : user)),
+        );
+        return updated;
+      } catch (error) {
+        setError('Erro ao editar dados do usuário.');
+        throw error;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [],
+  );
+
+  const removeUser = useCallback(async (id: string) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -94,7 +118,7 @@ function UsersProvider({ children, usersPromise }: IProps) {
     } finally {
       setIsLoading(false);
     }
-  }
+  }, []);
 
   // Continua existindo para refetch manual (ex: botão "atualizar",
   // ou após alguma ação externa) — isso não é fetch de montagem,
@@ -127,10 +151,12 @@ function UsersProvider({ children, usersPromise }: IProps) {
     <IUsersContext.Provider
       value={{
         users: visibleUsers,
+        user,
         filter,
         isLoading,
         error,
         createUser,
+        getUserById,
         editUser,
         removeUser,
         setFilter,
