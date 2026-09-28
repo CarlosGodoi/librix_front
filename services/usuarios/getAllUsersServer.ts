@@ -2,6 +2,7 @@ import 'server-only';
 
 import { cookies } from 'next/headers';
 import api from '@/services/api';
+import { IUser } from '@/interfaces/users';
 
 interface IGetAllUsersParams {
   take: number;
@@ -9,17 +10,19 @@ interface IGetAllUsersParams {
   search?: string;
 }
 
+export interface IUsersResponse {
+  users: IUser[];
+}
+
 export async function getAllUsersServer({
   take,
   skip,
   search,
-}: IGetAllUsersParams) {
+}: IGetAllUsersParams): Promise<IUsersResponse | null> {
   const cookieStore = await cookies();
   const accessToken = cookieStore.get('token')?.value;
 
   try {
-    console.log('SERVER USERS TOKEN EXISTS:', !!accessToken);
-
     if (!accessToken) {
       throw new Error('Usuário não autenticado');
     }

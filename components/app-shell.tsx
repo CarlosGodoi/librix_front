@@ -74,7 +74,7 @@ export function AppShell({ children, userRole }: AppShellProps) {
       ? pathname === '/livros'
       : pathname === href || pathname.startsWith(href + '/');
 
-  const SidebarContent = () => (
+  const SidebarContent = (
     <>
       <div className=" flex items-center gap-2.5 px-5 py-6">
         <div className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
@@ -141,7 +141,7 @@ export function AppShell({ children, userRole }: AppShellProps) {
   return (
     <div className="flex min-h-screen bg-background">
       <aside className="fixed inset-y-0 left-0 hidden w-64 flex-col border-r border-sidebar-border bg-sidebar lg:flex">
-        <SidebarContent />
+        {SidebarContent}
       </aside>
 
       {mobileOpen && (
@@ -151,7 +151,7 @@ export function AppShell({ children, userRole }: AppShellProps) {
             onClick={() => setMobileOpen(false)}
           >
             <aside className="absolute inset-0 left-0 flex w-64 flex-col bg-sidebar shadow-xl">
-              <SidebarContent />
+              {SidebarContent}
             </aside>
           </div>
         </div>

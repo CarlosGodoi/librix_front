@@ -72,6 +72,7 @@ export default function TableUsers() {
         await removeUser(user.id);
         toast.success('Usuário removido.');
       } catch (error) {
+        console.error(error);
         toast.error('Erro ao remover usuário.');
       }
     });

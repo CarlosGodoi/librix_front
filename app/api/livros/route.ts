@@ -16,7 +16,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(response.data);
   } catch (error) {
-    console.error('5 - erro:', error);
+    console.error('error:', error);
 
     if (isAxiosError(error)) {
       return NextResponse.json(

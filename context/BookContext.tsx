@@ -70,7 +70,6 @@ export const BooksProvider: React.FC<IProps> = ({ children, booksPromise }) => {
     setError(null);
 
     try {
-      const skip = (targetPage - 1) * BOOKS_PAGE_SIZE;
       const res: BooksResponse = await getAllBooks({
         take: BOOKS_PAGE_SIZE,
         skip: targetPage,
@@ -80,6 +79,7 @@ export const BooksProvider: React.FC<IProps> = ({ children, booksPromise }) => {
       setTotalPages(res.totalPage);
       setPage(targetPage);
     } catch (error) {
+      console.error(error);
       setError('Erro ao buscar livros. Tente novamente.');
     } finally {
       setIsLoading(false);
@@ -174,6 +174,7 @@ export const BooksProvider: React.FC<IProps> = ({ children, booksPromise }) => {
       const isLastItemOfPage = books.length === 1 && page > 1;
       await fetchBooks(isLastItemOfPage ? page - 1 : page);
     } catch (error) {
+      console.error(error);
       setError('Erro ao excluir livro. Tente novamente.');
     } finally {
       setIsLoading(false);

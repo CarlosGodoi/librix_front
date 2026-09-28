@@ -2,6 +2,7 @@ import 'server-only';
 
 import { cookies } from 'next/headers';
 import api from '@/services/api';
+import { ILoans } from '@/interfaces/loans';
 
 interface IGetAllLoansParams {
   take: number;
@@ -9,11 +10,15 @@ interface IGetAllLoansParams {
   search?: string;
 }
 
+export interface ILoansResponse {
+  users: ILoans[];
+}
+
 export async function getAllLoansServer({
   take,
   skip,
   search,
-}: IGetAllLoansParams) {
+}: IGetAllLoansParams): Promise<ILoansResponse | null> {
   const cookieStore = await cookies();
 
   const accessToken = cookieStore.get('token')?.value;

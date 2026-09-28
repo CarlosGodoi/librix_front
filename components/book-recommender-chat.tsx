@@ -1,10 +1,9 @@
 'use client';
 
-import { useMemo, useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { Sparkles, X, ArrowUp, Square, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useBooksContext } from '@/context/BookContext';
 import { useAuthContext } from '@/context/authContext';
 import { useBookRecommendations } from '@/app/hooks/useBookRecommendations';
 import { useBookChat } from '@/app/hooks/useBookChat';
@@ -26,8 +25,6 @@ type ChatMessage = {
 export function BookRecommenderChat() {
   const { user } = useAuthContext();
 
-  const { books } = useBooksContext();
-
   const {
     sendMessage: sendChatMessage,
     isLoading: isChatLoading,
@@ -48,23 +45,6 @@ export function BookRecommenderChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  /*
-   * Mantemos seu catálogo caso você queira utilizar
-   * essas informações posteriormente.
-   */
-  const catalog = useMemo(
-    () =>
-      books.map((book) => ({
-        title: book.title,
-        author: book.author,
-        category: book.category,
-        year: book.year,
-        available: book.copies,
-        synopsis: book.synopsis,
-      })),
-    [books],
-  );
 
   /*
    * Faz o chat acompanhar automaticamente

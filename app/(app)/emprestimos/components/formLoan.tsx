@@ -6,7 +6,6 @@ import { ArrowLeftRight, BookOpen, User, CalendarDays } from 'lucide-react';
 import { toast } from 'sonner';
 import { AvailabilityBadge } from '@/components/availability-badge';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import {
   Select,
@@ -62,11 +61,11 @@ export default function NewLoanForm() {
     register,
     handleSubmit,
     watch,
-    formState: { errors },
+    formState: {},
   } = form;
 
   const bookId = watch('bookId');
-  const memberId = watch('userId');
+  const userId = watch('userId');
 
   const availableBooks = books.filter(
     (book) => book.copies > 0 || book.id === initialBookId,
@@ -79,7 +78,7 @@ export default function NewLoanForm() {
     ? `${selectedBook.title} — ${selectedBook.author}`
     : undefined;
 
-  const selectedMember = activeMembers.find((m) => m.id === memberId);
+  const selectedUser = activeMembers.find((m) => m.id === userId);
 
   useEffect(() => {
     if (!bookId) {
@@ -182,7 +181,7 @@ export default function NewLoanForm() {
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger id="member">
                     <SelectValue placeholder="Selecione um usuário">
-                      {selectedMember?.name}
+                      {selectedUser?.name}
                     </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
@@ -232,7 +231,18 @@ export default function NewLoanForm() {
           <p className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
             Resumo
           </p>
-          {selectedBook ? (
+          {loadingBook ? (
+            <div className="space-y-4">
+              <div className="flex gap-3">
+                <div className="aspect-3/4 w-16 shrink-0 animate-pulse rounded-md bg-muted" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-3/4 animate-pulse rounded bg-muted" />
+                  <div className="h-3 w-1/2 animate-pulse rounded bg-muted" />
+                </div>
+              </div>
+              <div className="h-5 w-24 animate-pulse rounded bg-muted" />
+            </div>
+          ) : selectedBook ? (
             <div className="space-y-4">
               <div className="flex gap-3">
                 <div className="relative aspect-3/4 w-16 shrink-0 overflow-hidden rounded-md bg-muted">

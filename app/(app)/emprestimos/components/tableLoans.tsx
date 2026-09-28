@@ -95,12 +95,12 @@ function StatusBadge({ status }: { status: LoanStatus }) {
 
 export default function TableLoans({ userRole }: TableProps) {
   const { loans, returnedLoan } = useLoansContext();
-  const safeLoans = loans ?? [];
   const [tab, setTab] = useState<
     'todos' | 'ativos' | 'atrasados' | 'devolvidos'
   >('todos');
 
   const ISDENIED = userRole?.profile === PROFILE.VISITOR;
+  const safeLoans = loans ?? [];
 
   const enriched = useMemo(
     () =>

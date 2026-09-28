@@ -25,12 +25,12 @@ interface ILoansContext {
 export const ILoansContext = createContext<ILoansContext>({} as ILoansContext);
 interface IProps {
   children: ReactNode;
-  loansPromise: Promise<{ loans: ILoans[] }>;
+  loansPromise: Promise<{ loans: ILoans[] | null }>;
 }
 
 export const LoansProvider: React.FC<IProps> = ({ children, loansPromise }) => {
   const initialData = use(loansPromise);
-  const [loans, setLoans] = useState<ILoans[]>(initialData.loans);
+  const [loans, setLoans] = useState<ILoans[]>(initialData.loans ?? []);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -41,6 +41,8 @@ export const LoansProvider: React.FC<IProps> = ({ children, loansPromise }) => {
       const res = await getAllLoans({ take: 5, skip: 0 });
       setLoans(res.loans);
     } catch (error) {
+      console.error(error);
+
       setError('Erro ao buscar empréstimos. Tente novamente');
     } finally {
       setIsLoading(false);
@@ -58,6 +60,7 @@ export const LoansProvider: React.FC<IProps> = ({ children, loansPromise }) => {
       await refreshLoans();
       return [newLoan];
     } catch (error) {
+      console.error(error);
       setError('Erro ao registrar empréstimo. Tente novamente.');
       return null;
     } finally {
@@ -79,6 +82,7 @@ export const LoansProvider: React.FC<IProps> = ({ children, loansPromise }) => {
       );
       return true;
     } catch (error) {
+      console.error(error);
       setError('Erro ao fazer a devolução.');
       return false;
     } finally {

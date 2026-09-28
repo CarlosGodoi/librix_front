@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(response.data);
   } catch (error) {
-    console.log('Erro ao registrar livro', error);
+    console.error('Erro ao registrar livro', error);
 
     if (isAxiosError(error)) {
       return NextResponse.json(

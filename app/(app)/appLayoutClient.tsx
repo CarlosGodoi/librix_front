@@ -6,14 +6,16 @@ import { TUser } from '@/context/authContext';
 import { BooksProvider } from '@/context/BookContext';
 import { LoansProvider } from '@/context/loanContext';
 import { UsersProvider } from '@/context/userContext';
+import { IBook } from '@/interfaces/books';
+import { ILoans } from '@/interfaces/loans';
 import { IUser } from '@/interfaces/users';
 import React, { Suspense } from 'react';
 
 interface Props {
   children: React.ReactNode;
   usersPromise: Promise<{ users: IUser[] }>;
-  booksPromise: Promise<any>;
-  loansPromise: Promise<any>;
+  booksPromise: Promise<{ books: IBook[]; total: number; totalPage: number }>;
+  loansPromise: Promise<{ loans: ILoans[] }>;
   user?: TUser | null | undefined;
 }
 

@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { IBook } from '@/interfaces/books';
 import { ArrowLeft, BookPlus, Loader2, Save, Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { Controller, useForm } from 'react-hook-form';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import {
   BookFormInput,
   BookFormOutput,
@@ -26,8 +26,6 @@ import { formatISBN } from '@/utils/formatISBN';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { useBooksContext } from '@/context/BookContext';
-import { TUser } from '@/context/authContext';
-import { PROFILE } from '@/enums/profile';
 
 type BookProps = { book?: IBook };
 
@@ -40,7 +38,7 @@ export default function BookForm({ book }: BookProps) {
   const isEdit = Boolean(book);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const form = useForm<BookFormInput, any, BookFormOutput>({
+  const form = useForm<BookFormInput, unknown, BookFormOutput>({
     resolver: zodResolver(bookFormSchema),
     defaultValues: {
       title: book?.title ?? '',
@@ -62,7 +60,7 @@ export default function BookForm({ book }: BookProps) {
     register,
     setValue,
     handleSubmit,
-    formState: { errors },
+    formState: {},
   } = form;
 
   useEffect(() => {
@@ -82,7 +80,7 @@ export default function BookForm({ book }: BookProps) {
             : (book?.coverUrl?.path ?? '/covers/placeholder.png'),
       });
     }
-  }, [book]);
+  }, [book, form]);
 
   function handleCoverClick() {
     if (isEdit && !uploadingImage) {
@@ -111,6 +109,7 @@ export default function BookForm({ book }: BookProps) {
       setValue('coverUrl', newCoverUrl);
       toast.success('Capa atualizada com sucesso.');
     } catch (error) {
+      console.error(error);
       toast.error('Erro ao envia a nova capa.');
       setValue(
         'coverUrl',
@@ -142,6 +141,7 @@ export default function BookForm({ book }: BookProps) {
         toast.error('Não foi possível efetuar o cadastro.');
       }
     } catch (error) {
+      console.error(error);
       toast.error('Ocorreu um erro inesperado. Tente novamente.');
     } finally {
       setLoading(false);
@@ -162,6 +162,8 @@ export default function BookForm({ book }: BookProps) {
       toast.error('Erro ao excluir livro. Tente novamente.');
     }
   };
+
+  const coverUrl = useWatch({ control: form.control, name: 'coverUrl' });
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -202,7 +204,7 @@ export default function BookForm({ book }: BookProps) {
               aria-label={isEdit ? 'Alterar capa do livro' : undefined}
             >
               <Image
-                src={form.watch('coverUrl') || '/covers/placeholder.png'}
+                src={coverUrl || '/covers/placeholder.png'}
                 alt="Pré-visualização da capa"
                 fill
                 className="object-cover"

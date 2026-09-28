@@ -64,7 +64,7 @@ export function UserFormDialog({ open, onOpenChange, user }: Props) {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: {},
   } = form;
 
   useEffect(() => {
@@ -88,7 +88,7 @@ export function UserFormDialog({ open, onOpenChange, user }: Props) {
         });
       }
     }
-  }, [open, user]);
+  }, [open, user, form]);
 
   async function onSubmitForm(data: UserFormSchema) {
     try {
@@ -109,6 +109,7 @@ export function UserFormDialog({ open, onOpenChange, user }: Props) {
         toast.error('Não foi possível efetuar o cadastro.');
       }
     } catch (error) {
+      console.error(error);
       toast.error('Ocorreu um erro inesperado. Tente novamente.');
     } finally {
       setLoading(false);

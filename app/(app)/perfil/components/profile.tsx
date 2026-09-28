@@ -48,7 +48,7 @@ export function Profile() {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: {},
   } = form;
 
   useEffect(() => {
@@ -81,6 +81,7 @@ export function Profile() {
         toast.error('Não foi possível efetuar o cadastro.');
       }
     } catch (error) {
+      console.error(error);
       toast.error('Ocorreu um erro inesperado. Tente novamente.');
     } finally {
       setLoading(false);

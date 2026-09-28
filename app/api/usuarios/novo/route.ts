@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(response.data);
   } catch (error) {
-    console.log('Erro ao cadastrar usuário.', error);
+    console.error('Erro ao cadastrar usuário.', error);
 
     if (isAxiosError(error)) {
       return NextResponse.json(

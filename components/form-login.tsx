@@ -57,6 +57,8 @@ export function FormLogin() {
         );
       }
     } catch (error) {
+      console.error(error);
+
       // aqui só cairia em erro de rede/inesperado que realmente escape do signIn
       toast.error('Ocorreu um erro inesperado. Tente novamente.');
     } finally {

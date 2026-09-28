@@ -42,7 +42,7 @@ interface IUsersContext {
 export const IUsersContext = createContext<IUsersContext>({} as IUsersContext);
 interface IProps {
   children: ReactNode;
-  usersPromise: Promise<{ users: IUser[] }>;
+  usersPromise: Promise<{ users: IUser[] | null }>;
 }
 
 // Fica fora do componente: garante que a Promise só é criada uma vez,
@@ -50,7 +50,7 @@ interface IProps {
 // dá pra usar useMemo/useState(() => ...) dentro do componente também.
 function UsersProvider({ children, usersPromise }: IProps) {
   const initialData = use(usersPromise);
-  const [users, setUsers] = useState<IUser[]>(initialData.users);
+  const [users, setUsers] = useState<IUser[]>(initialData.users ?? []);
   const [user, setUser] = useState<IUser>({} as IUser);
   const [filter, setFilter] = useState<UserFilter>({ name: '', search: '' });
   const [isLoading, setIsLoading] = useState(false);
@@ -64,6 +64,7 @@ function UsersProvider({ children, usersPromise }: IProps) {
       setUsers((prev) => [...prev, created]);
       return created;
     } catch (error) {
+      console.error(error);
       setError('Erro ao cadastrar usuário.');
       throw error;
     } finally {
@@ -79,6 +80,7 @@ function UsersProvider({ children, usersPromise }: IProps) {
       setUser(result);
       return result;
     } catch (error) {
+      console.error(error);
       setError('Erro ao buscar dados do usuário.');
       throw error;
     } finally {
@@ -97,6 +99,7 @@ function UsersProvider({ children, usersPromise }: IProps) {
         );
         return updated;
       } catch (error) {
+        console.error(error);
         setError('Erro ao editar dados do usuário.');
         throw error;
       } finally {
@@ -113,6 +116,7 @@ function UsersProvider({ children, usersPromise }: IProps) {
       await deleteUser(id);
       setUsers((prev) => prev.filter((user) => user.id !== id));
     } catch (error) {
+      console.error(error);
       setError('Erro ao remover usuário.');
       throw error;
     } finally {
@@ -130,6 +134,7 @@ function UsersProvider({ children, usersPromise }: IProps) {
       const response = await getAllUsers({ take: 10, skip: 0 });
       setUsers(response.users);
     } catch (error) {
+      console.error(error);
       setError('Erro ao buscar usuários.');
     } finally {
       setIsLoading(false);
