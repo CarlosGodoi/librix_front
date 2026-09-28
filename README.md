@@ -117,8 +117,6 @@ O arquivo `.env.local` é ignorado pelo Git e não deve ser versionado. Use valo
 
 ```dotenv
 NEXT_PUBLIC_BASE_API=http://localhost:3334
-NEXT_PUBLIC_BASE_FRONT=http://localhost:3000
-NEXT_PUBLIC_BASE_FRONT_PROD=https://seu-frontend-em-producao.example.com
 ```
 3. Use **Cadastrar livro** para incluir uma obra. Preencha os campos obrigatórios e, quando necessário, envie a capa.
 4. Acesse **Usuários** para cadastrar leitores, alterar perfil ou situação e remover cadastros.
@@ -234,15 +232,6 @@ O comando recomendado para verificar o código é:
 ```bash
 pnpm lint
 ```
-
-Na análise deste estado, o lint terminou com `6 errors` e `28 warnings`. Os erros observados estão concentrados em tipos `any` explícitos, componentes declarados dentro do render do `AppShell` e uma regra do React Compiler no `ThemeToggle`. Eles são pendências da base atual e não foram alterados durante a criação desta documentação.
-
-Também não há testes automatizados ou script de testes definido no `package.json`. A validação funcional depende de uma API backend disponível e de um usuário autenticado.
-
-O `next.config.ts` está configurado com `typescript.ignoreBuildErrors: true`, portanto um build pode não representar uma verificação completa de tipos. Antes de publicar, é recomendável remover essa tolerância, corrigir os erros do lint e adicionar testes para autenticação, permissões, empréstimo, devolução e refresh de sessão.
-
-## Segurança operacional
-
 
 ## Licença
 
